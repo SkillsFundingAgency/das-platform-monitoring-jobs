@@ -16,7 +16,6 @@ steps:
 - task: gittools.gitversion.gitversion-task.GitVersion@5
   displayName: GitVersion
 
-
 - task: CopyFiles@2
   displayName: 'Copy Function files'
   inputs:
