@@ -21,14 +21,21 @@ class ConfigurationBuilder {
             throw "Base path has not been set. You must use SetBasePath when building configuration"
         }
         Write-Information "Adding deserialized json file: $FileName"
-        $FullFilePath = Join-Path -Path $this.BasePath -ChildPath $FileName -Resolve -ErrorAction Stop
-        $DeserializedFileContent = Get-Content -Path $FullFilePath -Raw | ConvertFrom-Json -AsHashtable
 
-        if (!$DeserializedFileContent.Values) {
-            $this.ProcessHashtable($DeserializedFileContent.Values)
-        }
-        else {
-            $this.ProcessHashtable($DeserializedFileContent)
+        try {
+            $FullFilePath = Join-Path -Path $this.BasePath -ChildPath $FileName -Resolve -ErrorAction Stop
+            $DeserializedFileContent = Get-Content -Path $FullFilePath -Raw | ConvertFrom-Json -AsHashtable
+
+            if (!$DeserializedFileContent.Values) {
+                $this.ProcessHashtable($DeserializedFileContent.Values)
+            }
+            else {
+                $this.ProcessHashtable($DeserializedFileContent)
+            }
+        } catch [System.Management.Automation.ItemNotFoundException] {
+            Write-Warning -Message $_.Exception.Message
+        } catch {
+            Write-Error -Message $_.Exception.Message -ErrorAction Stop
         }
     }
 
