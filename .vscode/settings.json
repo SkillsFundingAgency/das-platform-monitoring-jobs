@@ -1,0 +1,6 @@
+{
+    "azureFunctions.deploySubpath": "src/SFA.DAS.Monitoring.Functions",
+    "azureFunctions.projectLanguage": "PowerShell",
+    "azureFunctions.projectRuntime": "~2",
+    "debug.internalConsoleOptions": "neverOpen"
+}

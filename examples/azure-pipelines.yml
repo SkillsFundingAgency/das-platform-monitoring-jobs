@@ -1,0 +1,38 @@
+trigger:
+  batch: true
+  branches:
+    include:
+      - "*"
+
+pr: none
+
+workspace:
+    clean: all
+
+pool:
+  name: 'DAS - Continuous Integration'
+
+steps:
+- task: gittools.gitversion.gitversion-task.GitVersion@5
+  displayName: GitVersion
+
+
+- task: CopyFiles@2
+  displayName: 'Copy Function files'
+  inputs:
+    sourceFolder: '$(Build.SourcesDirectory)'
+    contents: |
+      src/SFA.DAS.Monitoring.Functions/**
+    targetFolder: '$(Build.SourcesDirectory)/release'
+
+- task: ArchiveFiles@2
+  inputs:
+    rootFolderOrFile: '$(Build.SourcesDirectory)/release'
+    includeRootFolder: false
+    archiveType: zip
+    archiveFile: '$(Build.ArtifactStagingDirectory)/SFA.DAS.Monitoring.Functions.zip'
+
+- task: PublishBuildArtifacts@1
+  displayName: Publish Artifact
+  inputs:
+    pathtoPublish: $(Build.ArtifactStagingDirectory)
