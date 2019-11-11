@@ -16,17 +16,9 @@ steps:
 - task: gittools.gitversion.gitversion-task.GitVersion@5
   displayName: GitVersion
 
-- task: CopyFiles@2
-  displayName: 'Copy Function files'
-  inputs:
-    sourceFolder: '$(Build.SourcesDirectory)'
-    contents: |
-      src/SFA.DAS.Monitoring.Functions/**
-    targetFolder: '$(Build.SourcesDirectory)/release'
-
 - task: ArchiveFiles@2
   inputs:
-    rootFolderOrFile: '$(Build.SourcesDirectory)/release/src/SFA.DAS.Monitoring.Functions'
+    rootFolderOrFile: '$(Build.SourcesDirectory)/src/SFA.DAS.Monitoring.Functions'
     includeRootFolder: false
     archiveType: zip
     archiveFile: '$(Build.ArtifactStagingDirectory)/SFA.DAS.Monitoring.Functions.zip'
