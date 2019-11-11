@@ -121,11 +121,7 @@
               },
               {
                 "name": "AppName",
-                "value": "das-azure-alert-processor"
-              },
-              {
-                "name": "FUNCTIONS_WORKER_RUNTIME",
-                "value": "powershell"
+                "value": "das-plmtr-jobs"
               },
               {
                 "name": "SLACK_USERNAME",
