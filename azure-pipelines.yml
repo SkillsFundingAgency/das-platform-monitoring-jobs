@@ -19,14 +19,14 @@ steps:
 - task: CopyFiles@2
   displayName: 'Copy Function files'
   inputs:
-    sourceFolder: '$(Build.SourcesDirectory)/src/SFA.DAS.Monitoring.Functions'
+    sourceFolder: '$(Build.SourcesDirectory)'
     contents: |
-      "**"
+      src/SFA.DAS.Monitoring.Functions/**
     targetFolder: '$(Build.SourcesDirectory)/release'
 
 - task: ArchiveFiles@2
   inputs:
-    rootFolderOrFile: '$(Build.SourcesDirectory)/release'
+    rootFolderOrFile: '$(Build.SourcesDirectory)/release/src/SFA.DAS.Monitoring.Functions'
     includeRootFolder: false
     archiveType: zip
     archiveFile: '$(Build.ArtifactStagingDirectory)/SFA.DAS.Monitoring.Functions.zip'
