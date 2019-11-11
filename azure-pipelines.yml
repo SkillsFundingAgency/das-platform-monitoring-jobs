@@ -19,9 +19,9 @@ steps:
 - task: CopyFiles@2
   displayName: 'Copy Function files'
   inputs:
-    sourceFolder: '$(Build.SourcesDirectory)'
+    sourceFolder: '$(Build.SourcesDirectory)/src/SFA.DAS.Monitoring.Functions'
     contents: |
-      src/SFA.DAS.Monitoring.Functions/**
+      "**"
     targetFolder: '$(Build.SourcesDirectory)/release'
 
 - task: ArchiveFiles@2
