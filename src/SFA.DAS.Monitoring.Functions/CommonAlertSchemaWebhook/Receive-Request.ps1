@@ -30,7 +30,7 @@ try {
         Username         = $Configuration.Get("SLACK_USERNAME")
         Channel          = $Channel
         AttachmentColour = $MessageMetadata.AttachmentColour
-        AttachmentTitle  = "$($MessageMetadata.TitleEmoji) $($Essentials.alertRule) [$($Essentials.monitorCondition)]"
+        AttachmentTitle  = "$($MessageMetadata.TitleEmoji) $($Essentials.alertRule)"
         AttachmentText   = Format-MessageText -AlertData $AlertData
     }
 
