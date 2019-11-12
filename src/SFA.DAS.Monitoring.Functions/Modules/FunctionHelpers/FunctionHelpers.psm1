@@ -139,7 +139,7 @@ function Format-MonitoringServiceResponse {
         "Log Analytics" {
             $Response = @{
                 Resource      = $AlertData.alertContext.AffectedConfigurationItems[0].ToLower()
-                SearchResults = $SearchResults
+                LogAnalytics = $SearchResults
             }
             break
         }
