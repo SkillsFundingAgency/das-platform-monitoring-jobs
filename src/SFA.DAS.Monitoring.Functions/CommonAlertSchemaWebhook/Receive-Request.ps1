@@ -11,8 +11,7 @@ try {
 
     # Test-RequestHeaders -Headers $Request.Headers
     Test-RequestBody -Body $Request.Body
-
-    Write-Information $Request.Body
+    Write-Debug ($Request.Body | ConvertTo-Json)
 
     $AlertData = $Request.Body.data
     $Essentials = $AlertData.essentials
