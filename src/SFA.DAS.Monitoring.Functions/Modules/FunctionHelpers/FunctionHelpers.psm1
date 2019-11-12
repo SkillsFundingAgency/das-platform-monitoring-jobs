@@ -44,12 +44,13 @@ function Test-RequestHeaders {
 
     $AcceptedHeaders = @{
         'Content-Type' = "application/json"
+        'charset'      = 'utf-8'
     }
 
     $AcceptedHeaders.Keys | ForEach-Object {
         $Key = $_.ToLower()
         if ($Key -notin $Headers.Keys) {
-            $ErrorResponse = "Required header [$Key] has not been supplied as part of the request"
+            $ErrorResponse = "Required header has not been supplied as part of the request. Accepted values are [$($AcceptedHeaders.Keys -join ",")]"
             Write-Error -Message $ErrorResponse
             throw [System.FormatException]$ErrorResponse
         }
