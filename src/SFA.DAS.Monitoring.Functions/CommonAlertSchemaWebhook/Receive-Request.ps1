@@ -9,7 +9,7 @@ try {
     $Configuration.AddEnvironmentVariables()
     $Configuration.Build()
 
-    Test-RequestHeaders -Headers $Request.Headers
+    # Test-RequestHeaders -Headers $Request.Headers
     Test-RequestBody -Body $Request.Body
 
     Write-Information $Request.Body
