@@ -137,9 +137,8 @@ function Format-MonitoringServiceResponse {
         }
 
         "Log Analytics" {
-            $EncodedUri = [System.Uri]::EscapeUriString($AlertData.alertContext.LinkToSearchResults)
             $Response = @{
-                Resource      = $AlertData.alertContext.AffectedConfigurationItems
+                Resource      = $AlertData.alertContext.AffectedConfigurationItems[0].ToLower()
                 SearchResults = $SearchResults
             }
             break
@@ -168,9 +167,7 @@ function Format-MessageText {
 $(if($Essentials.description){"*Description*:
 $($Essentials.description)"})
 
-$(if($AlertContext){"*Details*:
-$($AlertContext.Keys | Sort-Object | Foreach-Object {"• *$_* = $($AlertContext[$_])`r`n"})
-"})
+$(if($AlertContext){"$($AlertContext.Keys | Sort-Object | Foreach-Object {":black_small_square: *$_*: $($AlertContext[$_])`r`n"})"})
 "@
 
     Write-Output $MessageText
