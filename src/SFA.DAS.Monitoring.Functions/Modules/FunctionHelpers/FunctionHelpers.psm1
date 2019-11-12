@@ -125,12 +125,13 @@ function Format-MonitoringServiceResponse {
     $MonitoringService = $AlertData.essentials.monitoringService
 
     Write-Debug -Message ($AlertData.alertContext | ConvertTo-Json)
+    $EncodedUri = [System.Uri]::EscapeUriString($AlertData.alertContext.LinkToSearchResults)
+    $SearchResults = "<$EncodedUri|:notebook_with_decorative_cover:>"
 
     Switch ($MonitoringService) {
         "Application Insights" {
-            $EncodedUri = [System.Uri]::EscapeUriString($AlertData.alertContext.LinkToSearchResults)
             $Response = @{
-                SearchResults = ":notebook_with_decorative_cover: <$EncodedUri|Search Results>"
+                SearchResults = $SearchResults
             }
             break
         }
@@ -139,7 +140,7 @@ function Format-MonitoringServiceResponse {
             $EncodedUri = [System.Uri]::EscapeUriString($AlertData.alertContext.LinkToSearchResults)
             $Response = @{
                 Resource      = $AlertData.alertContext.AffectedConfigurationItems
-                SearchResults = ":notebook_with_decorative_cover: <$EncodedUri|Search Results>"
+                SearchResults = $SearchResults
             }
             break
         }
@@ -152,6 +153,7 @@ function Format-MonitoringServiceResponse {
 
     Write-Output $Response
 }
+
 function Format-MessageText {
 
     Param(
@@ -167,7 +169,7 @@ $(if($Essentials.description){"*Description*:
 $($Essentials.description)"})
 
 $(if($AlertContext){"*Details*:
-$($AlertContext.Keys | Sort-Object | Foreach-Object {"u2022 *$_* = $($AlertContext[$_])`r`n"})
+$($AlertContext.Keys | Sort-Object | Foreach-Object {"• *$_* = $($AlertContext[$_])`r`n"})
 "})
 "@
 
