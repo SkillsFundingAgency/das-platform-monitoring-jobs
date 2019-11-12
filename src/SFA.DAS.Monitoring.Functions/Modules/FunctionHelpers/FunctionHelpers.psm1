@@ -124,17 +124,22 @@ function Format-MonitoringServiceResponse {
 
     $MonitoringService = $AlertData.essentials.monitoringService
 
+    Write-Debug -Message ($AlertData.alertContext | ConvertTo-Json)
+
     Switch ($MonitoringService) {
         "Application Insights" {
-            Write-Debug -Message ($AlertData.alertContext | ConvertTo-Json)
-
             $EncodedUri = [System.Uri]::EscapeUriString($AlertData.alertContext.LinkToSearchResults)
-
             $Response = @{
-                SearchIntervalDurationMin = $AlertData.alertContext.SearchIntervalDurationMin
-                AlertType                 = $AlertData.alertContext.AlertType
-                Threshold                 = $AlertData.alertContext.Threshold
-                SearchResults             = "<$EncodedUri|Search Results>"
+                SearchResults = ":notebook_with_decorative_cover: <$EncodedUri|Search Results>"
+            }
+            break
+        }
+
+        "Log Analytics" {
+            $EncodedUri = [System.Uri]::EscapeUriString($AlertData.alertContext.LinkToSearchResults)
+            $Response = @{
+                Resource      = $AlertData.alertContext.AffectedConfigurationItems
+                SearchResults = ":notebook_with_decorative_cover: <$EncodedUri|Search Results>"
             }
             break
         }
@@ -147,7 +152,6 @@ function Format-MonitoringServiceResponse {
 
     Write-Output $Response
 }
-
 function Format-MessageText {
 
     Param(
@@ -159,13 +163,11 @@ function Format-MessageText {
     $AlertContext = Format-MonitoringServiceResponse -AlertData $AlertData
 
     $MessageText = @"
-*Impacted resources:*
-$(@($Essentials.alertTargetIDs | Foreach-Object {$_.Split('/')[-1]}) -join ' ,')
 $(if($Essentials.description){"*Description*:
 $($Essentials.description)"})
 
 $(if($AlertContext){"*Details*:
-$($AlertContext.Keys | Sort-Object | Foreach-Object {"• *$_* = $($AlertContext[$_])`r`n"})
+$($AlertContext.Keys | Sort-Object | Foreach-Object {"u2022 *$_* = $($AlertContext[$_])`r`n"})
 "})
 "@
 
