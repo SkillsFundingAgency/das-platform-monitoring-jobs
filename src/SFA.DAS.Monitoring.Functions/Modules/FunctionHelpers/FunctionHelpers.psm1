@@ -129,6 +129,15 @@ function Format-MonitoringServiceResponse {
     $SearchResults = "<$EncodedUri|:notebook_with_decorative_cover:>"
 
     Switch ($MonitoringService) {
+
+        "SmartDetector" {
+            $Response = @{
+                DetectionSummary = $AlertData.alertContext.DetectionSummary
+                FailureRate = "The usual failure rate for this resource is $($AlertData.alertContext.NormalFailureRate) but this has spiked to $($AlertData.alertContext.DetectedFailureRate)"
+            }
+            break
+        }
+
         "Application Insights" {
             $Response = @{
                 SearchResults = $SearchResults
