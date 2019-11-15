@@ -114,7 +114,7 @@ function New-Message {
         attachments = @(
             @{
                 color = $MessageMetadata.AttachmentColour
-                title = "$($MessageMetadata.TitleEmoji) $($Essentials.alertRule)"
+                title = "$($MessageMetadata.TitleEmoji) $($AlertData.essentials.alertRule)"
                 text  = Format-MessageText -AlertData $AlertData
             }
         )
