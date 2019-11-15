@@ -9,14 +9,10 @@ try {
     $Configuration.AddEnvironmentVariables()
     $Configuration.Build()
 
-    # Test-RequestHeaders -Headers $Request.Headers
     Test-RequestBody -Body $Request.Body
     Write-Information ($Request.Body | ConvertTo-Json -Depth 10)
 
     $AlertData = $Request.Body.data
-    $Essentials = $AlertData.essentials
-
-    $MessageMetadata = Get-MessageMetadata -MonitorCondition $Essentials.monitorCondition
 
     $Channel = $Configuration.Get("SLACK_DEFAULT_CHANNEL")
     if ($Request.Query.Channel) {
@@ -24,17 +20,8 @@ try {
         Write-Information "Overriding SLACK_DEFAULT_CHANNEL with parameter $Channel"
     }
 
-    $SlackMessageParameters = @{
-        WebhookUri       = $Configuration.Get("SLACK_WEBHOOK_URI")
-        IconEmoji        = $Configuration.Get("SLACK_ICON_EMOJI")
-        Username         = $Configuration.Get("SLACK_USERNAME")
-        Channel          = $Channel
-        AttachmentColour = $MessageMetadata.AttachmentColour
-        AttachmentTitle  = "$($MessageMetadata.TitleEmoji) $($Essentials.alertRule)"
-        AttachmentText   = Format-MessageText -AlertData $AlertData
-    }
-
-    Send-SlackMessage @SlackMessageParameters
+    $Message = New-Message -AlertData $AlertData -Channel $Channel
+    Send-SlackMessage -Message $Message
     Push-OutputBindingWrapper -StatusCode 202 -Body "Message accepted"
 
 }

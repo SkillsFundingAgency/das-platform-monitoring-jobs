@@ -82,106 +82,6 @@ function Test-RequestBody {
     }
 }
 
-function Get-MessageMetadata {
-    Param (
-        [Parameter(Mandatory = $true)]
-        [String]$MonitorCondition
-    )
-
-    $ConditionMetadata = @{
-        AttachmentColour = $null
-        TitleEmoji       = $null
-    }
-
-    switch ($MonitorCondition) {
-        'Fired' {
-            $ConditionMetadata.AttachmentColour = "#D40E0D"
-            $ConditionMetadata.TitleEmoji = ":fire:"
-            break
-        }
-
-        'Resolved' {
-            $ConditionMetadata.AttachmentColour = "#49C39E"
-            $ConditionMetadata.TitleEmoji = ":heavy_check_mark:"
-            break
-        }
-
-        default {
-            $ConditionMetadata.AttachmentColour = "#80D2DE"
-            $ConditionMetadata.TitleEmoji = ":question:"
-            break
-        }
-    }
-
-    Write-Output $ConditionMetadata
-}
-
-function Format-MonitoringServiceResponse {
-    Param(
-        [Parameter(Mandatory = $true)]
-        [Hashtable]$AlertData
-    )
-
-    $MonitoringService = $AlertData.essentials.monitoringService
-
-    Write-Debug -Message ($AlertData.alertContext | ConvertTo-Json)
-    $EncodedUri = [System.Uri]::EscapeUriString($AlertData.alertContext.LinkToSearchResults)
-    $SearchResults = "<$EncodedUri|:notebook_with_decorative_cover:>"
-
-    Switch ($MonitoringService) {
-
-        "SmartDetector" {
-            $Response = @{
-                DetectionSummary = $AlertData.alertContext.DetectionSummary
-                FailureRate = "The usual failure rate for this resource is $($AlertData.alertContext.NormalFailureRate) but this has spiked to $($AlertData.alertContext.DetectedFailureRate)"
-            }
-            break
-        }
-
-        "Application Insights" {
-            $Response = @{
-                SearchResults = $SearchResults
-            }
-            break
-        }
-
-        "Log Analytics" {
-            $Response = @{
-                Resource      = $AlertData.alertContext.AffectedConfigurationItems -join ","
-                LogAnalytics = $SearchResults
-            }
-            break
-        }
-
-        default {
-            Write-Warning -Message "$MonitoringService monitoring service response has not been implemented"
-            break
-        }
-    }
-
-    Write-Output $Response
-}
-
-function Format-MessageText {
-
-    Param(
-        [Parameter(Mandatory = $true)]
-        [hashtable]$AlertData
-    )
-
-    $Essentials = $AlertData.essentials
-    $AlertContext = Format-MonitoringServiceResponse -AlertData $AlertData
-
-    $MessageText = @"
-$(if($Essentials.description){"*Description*:
-$($Essentials.description)"})
-
-$(if($AlertContext){"$($AlertContext.Keys | Sort-Object | Foreach-Object {":black_small_square: *$_*: $($AlertContext[$_])`r`n"})"})
-"@
-
-    Write-Output $MessageText
-}
-
 function Send-SlackMessage {
     <#
 .SYNOPSIS
@@ -203,40 +103,15 @@ hashtable.  A hashtable representing the message to send to slack.
 
     Param(
         [Parameter(Mandatory = $true)]
-        [String]$WebhookUri,
-        [Parameter(Mandatory = $true)]
-        [String]$Username,
-        [Parameter(Mandatory = $true)]
-        [String]$Channel,
-        [Parameter(Mandatory = $true)]
-        [String]$IconEmoji,
-        [Parameter(Mandatory = $true)]
-        [String]$AttachmentColour,
-        [Parameter(Mandatory = $true)]
-        [String]$AttachmentTitle,
-        [Parameter(Mandatory = $true)]
-        [String]$AttachmentText
+        [hashtable]$Message
     )
 
     try {
 
-        $Body = @{
-            channel     = "#$Channel"
-            username    = $Username
-            icon_emoji  = $IconEmoji
-            attachments = @(
-                @{
-                    color = $AttachmentColour
-                    title = $AttachmentTitle
-                    text  = $AttachmentText
-                }
-            )
-        }
-
         Write-Information "Submitting slack message payload"
-        $SerializedMessage = "payload=$($Body | ConvertTo-Json -Compress)"
+        $SerializedMessage = "payload=$($Message | ConvertTo-Json -Compress)"
         Write-Information $SerializedMessage
-        Invoke-WebRequest -Uri $WebhookUri -Method POST -UseBasicParsing -Body $SerializedMessage
+        Invoke-WebRequest -Uri $Configuration.Get("SLACK_WEBHOOK_URI") -Method POST -UseBasicParsing -Body $SerializedMessage
     }
     catch {
         $ErrorResponse = $_.Exception.Message

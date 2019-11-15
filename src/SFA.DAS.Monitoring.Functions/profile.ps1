@@ -21,3 +21,4 @@
 using namespace System.Net
 using module '.\Modules\ConfigurationBuilder\ConfigurationBuilder.psm1'
 Import-Module -Name FunctionHelpers -ErrorAction Stop
+Import-Module -Name MessageBuilder -ErrorAction Stop
