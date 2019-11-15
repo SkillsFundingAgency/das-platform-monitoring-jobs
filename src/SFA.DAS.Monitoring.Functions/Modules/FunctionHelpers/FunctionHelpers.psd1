@@ -24,8 +24,6 @@
     FunctionsToExport = @(
         'Push-OutputBindingWrapper',
         'Test-RequestBody',
-        'Test-RequestHeaders',
-        'Get-MessageMetadata',
         'Format-MessageText',
         'Send-SlackMessage'
     )
