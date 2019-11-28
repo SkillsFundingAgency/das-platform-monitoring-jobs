@@ -48,7 +48,7 @@ function Format-MonitoringServiceResponse {
 
         "SmartDetector" {
             $Response = @{
-                DetectionSummary = $AlertData.alertContext.DetectionSummary
+                DetectionSummary = [System.Uri]::EscapeUriString($AlertData.alertContext.DetectionSummary)
                 FailureRate      = "The usual failure rate for this resource is $($AlertData.alertContext.NormalFailureRate) but this has spiked to $($AlertData.alertContext.DetectedFailureRate)"
             }
             break
