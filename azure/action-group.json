@@ -1,0 +1,52 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "resourceEnvironmentName": {
+      "type": "string"
+    },
+    "serviceName": {
+      "type": "string"
+    },
+    "functionAppName":{
+      "type": "string"
+    }
+  },
+  "variables": {
+    "deploymentUrlBase": "https://raw.githubusercontent.com/SkillsFundingAgency/das-platform-building-blocks/master/templates/",
+    "resourceNamePrefix": "[toLower(concat('das-', parameters('resourceEnvironmentName'),'-', parameters('serviceName')))]",
+    "actionGroupName": "[concat(variables('resourceNamePrefix'),'-algr')]",
+    "actionGroupShortName": "DAS Alerts",
+    "actionGroupWebhookReceiverName": "SlackWebhook",
+    "webhookServiceUri": "[concat('https://', parameters('functionAppName'),'.azurewebsites.net/api/common-alerts?code=')]",
+    "commonAlertFunctionName": "CommonAlertSchemaWebhook"
+  },
+  "resources": [
+    {
+      "apiVersion": "2017-05-10",
+      "name": "action-group",
+      "type": "Microsoft.Resources/deployments",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(variables('deploymentUrlBase'),'action-group.json')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "actionGroupName": {
+            "value": "[variables('actionGroupName')]"
+          },
+          "actionGroupShortName": {
+            "value": "[variables('actionGroupShortName')]"
+          },
+          "webhookReceiverName": {
+            "value": "[variables('actionGroupWebhookReceiverName')]"
+          },
+          "webhookServiceUri": {
+            "value": "[concat(variables('webhookServiceUri'),listsecrets(resourceId('Microsoft.Web/sites/functions', parameters('functionAppName'), variables('commonAlertFunctionName')),'2015-08-01').key)]"
+          }
+        }
+      }
+    }
+  ]
+}
