@@ -16,7 +16,7 @@
     "actionGroupName": "[concat(variables('resourceNamePrefix'),'-algr')]",
     "actionGroupShortName": "DAS Alerts",
     "actionGroupWebhookReceiverName": "SlackWebhook",
-    "webhookServiceUri": "[concat('https://', variables('functionAppName'),'.azurewebsites.net/api/common-alerts?code=')]",
+    "webhookServiceUri": "[concat('https://', variables('functionAppName'),'.azurewebsites.net/api/webhooks/common-alert?code=')]",
     "commonAlertFunctionName": "CommonAlertSchemaWebhook"
   },
   "resources": [
