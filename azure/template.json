@@ -33,7 +33,7 @@
     "actionGroupName": "[concat(variables('resourceNamePrefix'),'-algr')]",
     "actionGroupShortName": "DAS Alerts",
     "actionGroupWebhookReceiverName": "SlackWebhook",
-    "webhookServiceUri":"[concat('https://', variables('functionAppName'),'.azurewebsites.net/api/common-alerts?code=')]",
+    "webhookServiceUri": "[concat('https://', variables('functionAppName'),'.azurewebsites.net/api/common-alerts?code=')]",
     "commonAlertFunctionName": "CommonAlertSchemaWebhook"
   },
   "resources": [
@@ -103,6 +103,10 @@
               {
                 "name": "AzureWebJobsDashboard",
                 "value": "[parameters('sharedStorageAccountConnectionString')]"
+              },
+              {
+                "name": "AzureWebJobsSecretStorageType",
+                "value": "Files"
               },
               {
                 "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
@@ -182,7 +186,7 @@
           }
         }
       },
-      "dependsOn":[
+      "dependsOn": [
         "function-app"
       ]
     }
