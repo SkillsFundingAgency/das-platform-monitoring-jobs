@@ -1,5 +1,5 @@
 {
-  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
     "environmentName": {
@@ -29,7 +29,12 @@
     "deploymentUrlBase": "https://raw.githubusercontent.com/SkillsFundingAgency/das-platform-building-blocks/master/templates/",
     "resourceNamePrefix": "[toLower(concat('das-', parameters('resourceEnvironmentName'),'-', parameters('serviceName')))]",
     "consumptionPlanName": "[concat(variables('resourceNamePrefix'),'-asp')]",
-    "functionAppName": "[concat(variables('resourceNamePrefix'),'-fa')]"
+    "functionAppName": "[concat(variables('resourceNamePrefix'),'-fa')]",
+    "actionGroupName": "[concat(variables('resourceNamePrefix'),'-algr')]",
+    "actionGroupShortName": "DAS Alerts",
+    "actionGroupWebhookReceiverName": "SlackWebhook",
+    "webhookServiceUri":"[concat('https://', variables('functionAppName'),'.azurewebsites.net/api/common-alerts?code=')]",
+    "commonAlertFunctionName": "CommonAlertSchemaWebhook"
   },
   "resources": [
     {
@@ -150,6 +155,35 @@
       "dependsOn": [
         "function-app-insights",
         "consumption-plan"
+      ]
+    },
+    {
+      "apiVersion": "2017-05-10",
+      "name": "action-group",
+      "type": "Microsoft.Resources/deployments",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(variables('deploymentUrlBase'),'action-group.json')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "actionGroupName": {
+            "value": "[variables('actionGroupName')]"
+          },
+          "actionGroupShortName": {
+            "value": "[variables('actionGroupShortName')]"
+          },
+          "webhookReceiverName": {
+            "value": "[variables('actionGroupWebhookReceiverName')]"
+          },
+          "webhookServiceUri": {
+            "value": "[concat(variables('webhookServiceUri'),listsecrets(resourceId('Microsoft.Web/sites/functions', variables('functionAppName'), variables('commonAlertFunctionName')),'2015-08-01').key)]"
+          }
+        }
+      },
+      "dependsOn":[
+        "function-app"
       ]
     }
   ],
