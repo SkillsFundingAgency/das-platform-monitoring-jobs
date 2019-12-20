@@ -5,7 +5,7 @@
       "type": "timerTrigger",
       "direction": "in",
       "name": "Timer",
-      "schedule": "%METRICS_CRON_SCHEDULE%",
+      "schedule": "%AZURE_DEVOPS_METRIC_CRON_SCHEDULE%",
       "runOnStartup": false
     }
   ]
