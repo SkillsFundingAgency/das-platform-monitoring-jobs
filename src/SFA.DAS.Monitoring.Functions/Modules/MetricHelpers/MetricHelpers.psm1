@@ -42,7 +42,7 @@ function New-Signature {
 
     $Sha256 = New-Object System.Security.Cryptography.HMACSHA256
     $Sha256.Key = $KeyBytes
-    $CalculatedHash = $sha256.ComputeHash($BytesToHash)
+    $CalculatedHash = $Sha256.ComputeHash($BytesToHash)
     $EncodedHash = [Convert]::ToBase64String($CalculatedHash)
     $Authorization = "SharedKey ${WorkspaceID}:${EncodedHash}"
 
