@@ -74,7 +74,7 @@ function Send-LogAnalyticsPayload {
 
     # --- To be pulled from env
     $WorkspaceID = $ENV:LOG_ANALYTICS_WORKSPACE_ID
-    $SharedKey = $ENV:LOG_ANALYTICS_KEY
+    $SharedKey = $ENV:LOG_ANALYTICS_WORKSPACE_KEY
     $Date = [DateTime]::UtcNow.ToString("r")
 
     $NewSignatureParameters = @{
