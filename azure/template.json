@@ -123,6 +123,10 @@
           "functionAppAppSettings": {
             "value": [
               {
+                "name": "PSWorkerInProcConcurrencyUpperBound",
+                "value": 5
+              },
+              {
                 "name": "AzureWebJobsStorage",
                 "value": "[parameters('sharedStorageAccountConnectionString')]"
               },
