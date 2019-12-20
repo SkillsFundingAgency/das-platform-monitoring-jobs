@@ -1,0 +1,36 @@
+{
+  "data": {
+      "essentials": {
+          "description": "SQL database DTU consumption is greater than 90%",
+          "monitoringService": "Log Analytics",
+          "essentialsVersion": "1.0",
+          "alertId": "/subscriptions/6c93f7dc-6c36-4ea6-8de3-3f4574f88027/providers/Microsoft.AlertsManagement/alerts/c7ab8fef-8693-4e6c-a8f8-0100a009f7d0",
+          "monitorCondition": "Fired",
+          "signalType": "Log",
+          "alertRule": "DAS - Azure SQL DTU Consumption Percentage Greater than 90",
+          "alertTargetIDs": "/subscriptions/6c93f7dc-6c36-4ea6-8de3-3f4574f88027/resourcegroups/das-prd-mgmt-rg/providers/microsoft.operationalinsights/workspaces/das-pd-oms",
+          "severity": "Sev0",
+          "originAlertId": "dc6fa5f0-8f36-47d3-a27b-3420ff479ed9",
+          "alertContextVersion": "1.1",
+          "firedDateTime": "2019-11-12T19:47:49.6909229Z"
+      },
+      "alertContext": {
+          "AlertType": "Metric measurement",
+          "SearchQuery": "AzureMetrics\n| where ResourceProvider==\"MICROSOFT.SQL\"\n| where MetricName=='dtu_consumption_percent'\n| summarize AggregatedValue = avg(Average) by Resource, bin_at(TimeGenerated,5m, datetime(2019-11-12T19:45:10.0000000))",
+          "SearchIntervalStartTimeUtc": "2019-11-12T19:30:10Z",
+          "SearchResults": "System.Collections.Hashtable",
+          "Operator": "Greater Than",
+          "ResultCount": 2,
+          "LinkToSearchResults": "https://portal.azure.com#@3aacc835-4b83-483d-841d-cd787f6f1486/blade/Microsoft_OperationsManagementSuite_Workspace/AnalyticsBlade/initiator/AnalyticsShareLinkToQuery/isQueryEditorVisible/true/scope/%7B%22resources%22%3A%5B%7B%22resourceId%22%3A%22%2Fsubscriptions%2F6c93f7dc-6c36-4ea6-8de3-3f4574f88027%2FresourceGroups%2Fdas-prd-mgmt-rg%2Fproviders%2FMicrosoft.OperationalInsights%2Fworkspaces%2FDAS-PD-OMS%22%7D%5D%7D/query/AzureMetrics%0A%7C%20where%20ResourceProvider%3D%3D%22MICROSOFT.SQL%22%0A%7C%20where%20MetricName%3D%3D%27dtu_consumption_percent%27%0A%7C%20summarize%20AggregatedValue%20%3D%20avg%28Average%29%20by%20Resource%2C%20bin_at%28TimeGenerated%2C5m%2C%20datetime%282019-11-12T19%3A45%3A10.0000000%29%29/isQuerybase64Compressed/false/timespanInIsoFormat/2019-11-12T19%3a30%3a10.0000000Z%2f2019-11-12T19%3a45%3a10.0000000Z",
+          "SearchIntervalEndtimeUtc": "2019-11-12T19:45:10Z",
+          "WorkspaceId": "b617de7c-4d38-4541-98d2-2622fb995530",
+          "Threshold": 90,
+          "IncludedSearchResults": "True",
+          "SearchIntervalDurationMin": "15",
+          "SearchIntervalInMinutes": "15",
+          "SeverityDescription": "Critical",
+          "AffectedConfigurationItems": "DAS-PRD-PFBE-DB"
+      }
+  },
+  "schemaId": "azureMonitorCommonAlertSchema"
+}
