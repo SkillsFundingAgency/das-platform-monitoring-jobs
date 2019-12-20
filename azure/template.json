@@ -23,6 +23,37 @@
     },
     "slackWebhookUri": {
       "type": "securestring"
+    },
+    "logAnalyticsWorkspaceId": {
+      "type": "string"
+    },
+    "logAnalyticsWorkspaceKey": {
+      "type": "securestring"
+    },
+    "azureDevOpsOrganization": {
+      "type": "string"
+    },
+    "azureDevOpsProject": {
+      "type": "string"
+    },
+    "azureDevOpsAccessToken": {
+      "type": "string"
+    },
+    "azureDevOpsBuildDurationQueryFromDays": {
+      "type": "int",
+      "defaultValue": 1
+    },
+    "azureDevOpsBuildDurationResultsPerSet": {
+      "type": "int",
+      "defaultValue": 100
+    },
+    "azureDevOpsMetricCronSchedule": {
+      "type": "string",
+      "defaultValue": "0 */5 * * * *"
+    },
+    "azureDevOpsMetricEnvironments": {
+      "type": "string",
+      "defaultValue": "PROD"
     }
   },
   "variables": {
@@ -146,6 +177,42 @@
               {
                 "name": "FUNCTIONS_WORKER_RUNTIME",
                 "value": "powershell"
+              },
+              {
+                "name": "LOG_ANALYTICS_WORKSPACE_ID",
+                "value": "[parameters('logAnalyticsWorkspaceId')]"
+              },
+              {
+                "name": "LOG_ANALYTICS_WORKSPACE_KEY",
+                "value": "[parameters('logAnalyticsWorkspaceKey')]"
+              },
+              {
+                "name": "AZURE_DEVOPS_ORGANIZATION",
+                "value": "[parameters('azureDevOpsOrganization')]"
+              },
+              {
+                "name": "AZURE_DEVOPS_PROJECT",
+                "value": "[parameters('azureDevOpsProject')]"
+              },
+              {
+                "name": "AZURE_DEVOPS_ACCESS_TOKEN",
+                "value": "[parameters('azureDevOpsAccessToken')]"
+              },
+              {
+                "name": "AZURE_DEVOPS_BUILD_DURATION_QUERYFROMDAYS",
+                "value": "[parameters('azureDevOpsBuildDurationQueryFromDays')]"
+              },
+              {
+                "name": "AZURE_DEVOPS_BUILD_DURATION_RESULTSPERSET",
+                "value": "[parameters('azureDevOpsBuildDurationResultsPerSet')]"
+              },
+              {
+                "name": "AZURE_DEVOPS_METRIC_CRON_SCHEDULE",
+                "value": "[parameters('azureDevOpsMetricCronSchedule')]"
+              },
+              {
+                "name": "AZURE_DEVOPS_METRIC_ENVIRONMENTS",
+                "value": "[parameters('azureDevOpsMetricEnvironments')]"
               }
             ]
           }
