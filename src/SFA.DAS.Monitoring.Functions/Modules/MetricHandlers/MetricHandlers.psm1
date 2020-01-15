@@ -5,19 +5,22 @@ function Get-DeploymentDuration {
 
     $ExcludedDefinitionPaths = @(
         "\_Archive",
-        "\Shared Packages"
+        "\Shared Packages",
+        "\Platform Automation"
     )
 
-    $IncludedEnvironments = @(
-        "PP",
-        "PREPROD",
-        "PRE"
-    )
+    $MetricEnvironmentMap = @{
+        "PP" = "PP"
+        "PREPROD" = "PP"
+        "PRE" = "PP"
+        "PROD" = "PRD"
+        "Production" = "PRD"
+    }
 
     $MetricResult = [System.Collections.ArrayList]::new()
 
-    Write-Information "Collecting deployment metrics for environments [$($IncludedEnvironments -join ',')}]"
-    Write-Information "Excluding the definition paths [$($ExcludedDefinitionPaths -join ',')]"
+    Write-Information "Gathering metrics for environments [$($MetricEnvironments -join ',')]"
+    Write-Information "Excluding definition paths [$($ExcludedDefinitionPaths -join ',')]"
 
     $DefinitionsUri = "release/definitions?`$expand=Environments&queryOrder=nameAscending&"
     $DefinitionList = (Invoke-VstsRestMethod -Uri $DefinitionsUri -ApiVersion $DefaultApiVersion).Value |
@@ -30,17 +33,18 @@ function Get-DeploymentDuration {
         $DefinitionName = $_.Name
         $DefinitionPath = $_.Path.TrimStart("\")
 
-        $EnvironmentIdList = $_.Environments | Where-Object {$_.Name -in $IncludedEnvironments} | Select-Object -ExpandProperty Id
+        $_.Environments | Where-Object {$_.Name -in $MetricEnvironmentMap.Keys } | ForEach-Object {
 
-        $EnvironmentIdList | ForEach-Object {
+            $EnvironmentName = $MetricEnvironmentMap[$_.Name]
 
-            $DeploymentUri = "release/deployments?definitionId=${DefinitionId}&definitionEnvironmentId=$_&deploymentStatus=succeeded&latestAttemptsOnly=true&`$top=1&"
+            $DeploymentUri = "release/deployments?definitionId=${DefinitionId}&definitionEnvironmentId=$($_.Id)&deploymentStatus=succeeded&latestAttemptsOnly=true&`$top=1&"
 
             $Response = (Invoke-VstsRestMethod -Uri $DeploymentUri -ApiVersion $DefaultApiVersion).Value |
                             Select-Object -Property @{Name = "DefinitionId"; Expression = {$DefinitionId}},
                                                     @{Name = "DefinitionName"; Expression = {$DefinitionName}},
                                                     @{Name = "DefinitionPath"; Expression = {$DefinitionPath}},
-                                                    @{Name = "Environment"; Expression = {$_.ReleaseEnvironment.Name}},
+                                                    @{Name = "ReleaseId"; Expression = {$_.Release.Id}},
+                                                    @{Name = "Environment"; Expression = {$EnvironmentName.ToUpper()}},
                                                     @{Name = "QueuedOn"; Expression = {$_.QueuedOn.ToString("u")}},
                                                     @{Name = "StartedOn"; Expression = {$_.StartedOn.ToString("u")}},
                                                     @{Name = "CompletedOn"; Expression = {$_.CompletedOn.ToString("u")}},
