@@ -101,6 +101,7 @@ function Send-LogAnalyticsPayload {
         UseBasicParsing = $true
     }
 
+    Write-Information "Sending metric payload to Log Analytics workspace $WorkspaceID} as type ${LogType}"
     Invoke-RestMethod @InvokeRestMethodParameters -ErrorAction Stop
 }
 
@@ -145,7 +146,38 @@ function Invoke-ODataRestMethod {
         ErrorAction = "STOP"
     }
 
-    Invoke-RestMethod @InvokeRestMethodParameters -Verbose:$VerbosePreference
+    $Response = Invoke-RestMethod @InvokeRestMethodParameters -Verbose:$VerbosePreference
+
+    if ($Response."@vsts.warnings") {
+        $Response."@vsts.warnings" | ForEach-Object {
+            Write-Warning -Message "$_"
+        }
+    }
+
+    Write-Output $Response
+}
+
+function Invoke-VstsRestMethod {
+    [CmdletBinding()]
+    Param(
+        [Parameter(Mandatory = $true)]
+        [String]$Uri,
+        [Parameter(Mandatory = $false)]
+        [ValidateSet("5.1","6.0-preview.4")]
+        [String]$ApiVersion = 5.1
+    )
+
+    $FullUri = "https://vsrm.dev.azure.com/${ENV:AZURE_DEVOPS_ORGANIZATION}/${ENV:AZURE_DEVOPS_PROJECT}/_apis/${Uri}?api-version=${ApiVersion}"
+
+    $AuthenticationToken = $ENV:AZURE_DEVOPS_ACCESS_TOKEN
+
+    $Base64Authentication = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(("pat-token:$AuthenticationToken")))
+    $Headers = @{
+        Authorization = "Basic $Base64Authentication"
+        Accept        = "application/json"
+    }
+
+    Invoke-RestMethod -Method GET -Uri $FullUri -Headers $Headers -Verbose:$VerbosePreference
 }
 
 function Get-BuildOutcomeCount {
@@ -180,8 +212,10 @@ function Get-BuildOutcomeCount {
     (Invoke-ODataRestMethod -EntitySet "${EntitySet}/`$count" -Query $Query -Verbose) -replace "ï»¿"
 }
 
+
 Export-ModuleMember -Function @(
     "Send-LogAnalyticsPayload",
     "Invoke-ODataRestMethod",
+    "Invoke-VstsRestMethod",
     "Get-BuildOutcomeCount"
 )
