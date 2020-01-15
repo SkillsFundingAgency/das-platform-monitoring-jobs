@@ -22,12 +22,13 @@ function Get-DeploymentDuration {
     $DefinitionsUri = "release/definitions?`$expand=Environments&queryOrder=nameAscending&"
     $DefinitionList = (Invoke-VstsRestMethod -Uri $DefinitionsUri -ApiVersion $DefaultApiVersion).Value |
         Where-Object {$_.Path -notin $ExcludedDefinitionPaths} |
-        Select-Object -Property Id, Name, Environments
+        Select-Object -Property Id, Name, Path, Environments
 
     $DefinitionList | ForEach-Object {
 
         $DefinitionId = $_.Id
         $DefinitionName = $_.Name
+        $DefinitionPath = $_.Path.TrimStart("\")
 
         $EnvironmentIdList = $_.Environments | Where-Object {$_.Name -in $IncludedEnvironments} | Select-Object -ExpandProperty Id
 
@@ -38,6 +39,7 @@ function Get-DeploymentDuration {
             $Response = (Invoke-VstsRestMethod -Uri $DeploymentUri -ApiVersion $DefaultApiVersion).Value |
                             Select-Object -Property @{Name = "DefinitionId"; Expression = {$DefinitionId}},
                                                     @{Name = "DefinitionName"; Expression = {$DefinitionName}},
+                                                    @{Name = "DefinitionPath"; Expression = {$DefinitionPath}},
                                                     @{Name = "Environment"; Expression = {$_.ReleaseEnvironment.Name}},
                                                     @{Name = "QueuedOn"; Expression = {$_.QueuedOn.ToString("u")}},
                                                     @{Name = "StartedOn"; Expression = {$_.StartedOn.ToString("u")}},
