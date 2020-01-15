@@ -49,8 +49,6 @@ function Get-DeploymentDuration {
         }
     }
 
-    Write-Information ($MetricResult | ConvertTo-JSON)
-
     Send-LogAnalyticsPayload -Body ($MetricResult | ConvertTo-JSON) -LogType $LogType -ErrorAction Stop
 
 }
