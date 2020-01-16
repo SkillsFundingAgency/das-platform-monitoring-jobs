@@ -19,7 +19,7 @@ function Get-DeploymentDuration {
 
     $MetricResult = [System.Collections.ArrayList]::new()
 
-    Write-Information "Gathering metrics for environments [$($MetricEnvironments -join ',')]"
+    Write-Information "Gathering metrics for environments [$($MetricEnvironments.Keys -join ',')]"
     Write-Information "Excluding definition paths [$($ExcludedDefinitionPaths -join ',')]"
 
     $DefinitionsUri = "release/definitions?`$expand=Environments&queryOrder=nameAscending&"
