@@ -53,7 +53,7 @@
     },
     "azureDevOpsMetricEnvironments": {
       "type": "string",
-      "defaultValue": "PROD"
+      "defaultValue": "DEV,PROD"
     }
   },
   "variables": {
