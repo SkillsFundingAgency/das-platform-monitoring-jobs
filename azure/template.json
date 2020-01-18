@@ -56,8 +56,8 @@
     "deploymentUrlBase": "https://raw.githubusercontent.com/SkillsFundingAgency/das-platform-building-blocks/master/templates/",
     "resourceNamePrefix": "[toLower(concat('das-', parameters('resourceEnvironmentName'),'-', parameters('serviceName')))]",
     "consumptionPlanName": "[concat(variables('resourceNamePrefix'),'-asp')]",
-    "monitoringFunctionAppName": "[concat(variables('resourceNamePrefix'),'-fa')]",
-    "metricsFunctionAppName": "[concat(variables('resourceNamePrefix'),'-fa')]"
+    "monitoringFunctionAppName": "[concat(variables('resourceNamePrefix'), 'mtr' ,'-fa')]",
+    "metricsFunctionAppName": "[concat(variables('resourceNamePrefix'), 'mtr ','-fa')]"
 
   },
   "resources": [
@@ -80,7 +80,7 @@
     },
     {
       "apiVersion": "2017-05-10",
-      "name": "function-app-insights",
+      "name": "metrics-function-app-insights",
       "type": "Microsoft.Resources/deployments",
       "properties": {
         "mode": "Incremental",
@@ -90,10 +90,30 @@
         },
         "parameters": {
           "appInsightsName": {
-            "value": "[variables('functionAppName')]"
+            "value": "[variables('metricsFunctionAppName')]"
           },
           "attachedService": {
-            "value": "[variables('functionAppName')]"
+            "value": "[variables('metricsFunctionAppName')]"
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "2017-05-10",
+      "name": "monitoring-function-app-insights",
+      "type": "Microsoft.Resources/deployments",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(variables('deploymentUrlBase'),'application-insights.json')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "appInsightsName": {
+            "value": "[variables('monitoringFunctionAppName')]"
+          },
+          "attachedService": {
+            "value": "[variables('monitoringFunctionAppName')]"
           }
         }
       }
@@ -185,7 +205,7 @@
         }
       },
       "dependsOn": [
-        "function-app-insights",
+        "monitoring-function-app-insights",
         "consumption-plan"
       ]
     },
@@ -292,7 +312,7 @@
         }
       },
       "dependsOn": [
-        "function-app-insights",
+        "metrics-function-app-insights",
         "consumption-plan"
       ]
     }
