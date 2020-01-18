@@ -57,7 +57,7 @@
     "resourceNamePrefix": "[toLower(concat('das-', parameters('resourceEnvironmentName'),'-', parameters('serviceName')))]",
     "consumptionPlanName": "[concat(variables('resourceNamePrefix'),'-asp')]",
     "monitoringFunctionAppName": "[concat(variables('resourceNamePrefix'), 'mtr' ,'-fa')]",
-    "metricsFunctionAppName": "[concat(variables('resourceNamePrefix'), 'mtr ','-fa')]"
+    "metricsFunctionAppName": "[concat(variables('resourceNamePrefix'), 'met ','-fa')]"
 
   },
   "resources": [
