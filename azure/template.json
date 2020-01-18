@@ -158,7 +158,7 @@
               },
               {
                 "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
-                "value": "[reference('function-app-insights').outputs.InstrumentationKey.value]"
+                "value": "[reference('monitoring-function-app-insights').outputs.InstrumentationKey.value]"
               },
               {
                 "name": "FUNCTIONS_EXTENSION_VERSION",
@@ -249,7 +249,7 @@
               },
               {
                 "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
-                "value": "[reference('function-app-insights').outputs.InstrumentationKey.value]"
+                "value": "[reference('metrics-function-app-insights').outputs.InstrumentationKey.value]"
               },
               {
                 "name": "FUNCTIONS_EXTENSION_VERSION",
