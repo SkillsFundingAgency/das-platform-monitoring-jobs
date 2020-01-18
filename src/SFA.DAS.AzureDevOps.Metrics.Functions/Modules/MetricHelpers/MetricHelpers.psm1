@@ -67,42 +67,53 @@ function Send-LogAnalyticsPayload {
     [CmdletBinding()]
     Param(
         [Parameter(Mandatory = $true)]
+        [AllowEmptyString()]
         [string]$Body,
         [Parameter(Mandatory = $true)]
         [string]$LogType
     )
 
-    # --- To be pulled from env
-    $WorkspaceID = $ENV:LOG_ANALYTICS_WORKSPACE_ID
-    $SharedKey = $ENV:LOG_ANALYTICS_WORKSPACE_KEY
-    $Date = [DateTime]::UtcNow.ToString("r")
+    if ($Body) {
+        # --- To be pulled from env
+        $WorkspaceID = $ENV:LOG_ANALYTICS_WORKSPACE_ID
+        $SharedKey = $ENV:LOG_ANALYTICS_WORKSPACE_KEY
+        $Date = [DateTime]::UtcNow.ToString("r")
 
-    $NewSignatureParameters = @{
-        WorkspaceID   = $WorkspaceID
-        SharedKey     = $SharedKey
-        ContentLength = $Body.Length
-        Date          = $Date
+        $NewSignatureParameters = @{
+            WorkspaceID   = $WorkspaceID
+            SharedKey     = $SharedKey
+            ContentLength = $Body.Length
+            Date          = $Date
+        }
+
+        $Signature = New-Signature @NewSignatureParameters
+
+        $Headers = @{
+            "Authorization" = $Signature
+            "Log-Type"      = $LogType
+            "x-ms-date"     = $Date
+        }
+
+        $InvokeRestMethodParameters = @{
+            Uri             = "https://${WorkspaceId}.ods.opinsights.azure.com/api/logs?api-version=2016-04-01"
+            Method          = "POST"
+            ContentType     = "application/json"
+            Headers         = $Headers
+            Body            = ([System.Text.Encoding]::UTF8.GetBytes($Body))
+            UseBasicParsing = $true
+        }
+
+        try {
+            Write-Information "Sending metric payload to Log Analytics workspace $WorkspaceID} as type ${LogType}"
+            Invoke-RestMethod @InvokeRestMethodParameters -ErrorAction Stop
+        } catch {
+            $PSCmdlet.ThrowTerminatingError($_)
+        }
+
+    } else {
+        $ErrorRecord = Write-Error -Message "No data was found in the Body parameter. Not proessing."
+        $PSCmdlet.ThrowTerminatingError($ErrorRecord)
     }
-
-    $Signature = New-Signature @NewSignatureParameters -ErrorAction Stop
-
-    $Headers = @{
-        "Authorization" = $Signature
-        "Log-Type"      = $LogType
-        "x-ms-date"     = $Date
-    }
-
-    $InvokeRestMethodParameters = @{
-        Uri             = "https://${WorkspaceId}.ods.opinsights.azure.com/api/logs?api-version=2016-04-01"
-        Method          = "POST"
-        ContentType     = "application/json"
-        Headers         = $Headers
-        Body            = ([System.Text.Encoding]::UTF8.GetBytes($Body))
-        UseBasicParsing = $true
-    }
-
-    Write-Information "Sending metric payload to Log Analytics workspace $WorkspaceID} as type ${LogType}"
-    Invoke-RestMethod @InvokeRestMethodParameters -ErrorAction Stop
 }
 
 function Invoke-ODataRestMethod {
@@ -146,15 +157,20 @@ function Invoke-ODataRestMethod {
         ErrorAction = "STOP"
     }
 
-    $Response = Invoke-RestMethod @InvokeRestMethodParameters -Verbose:$VerbosePreference
+    try {
+        $Response = Invoke-RestMethod @InvokeRestMethodParameters -Verbose:$VerbosePreference
 
-    if ($Response."@vsts.warnings") {
-        $Response."@vsts.warnings" | ForEach-Object {
-            Write-Warning -Message "$_"
+        if ($Response."@vsts.warnings") {
+            $Response."@vsts.warnings" | ForEach-Object {
+                Write-Warning -Message "$_"
+            }
         }
-    }
 
-    Write-Output $Response
+        Write-Output $Response
+
+    } catch {
+        $PSCmdlet.ThrowTerminatingError($_)
+    }
 }
 
 function Invoke-VstsRestMethod {
@@ -163,11 +179,26 @@ function Invoke-VstsRestMethod {
         [Parameter(Mandatory = $true)]
         [String]$Uri,
         [Parameter(Mandatory = $false)]
+        [ValidateSet("VSRM", "None")]
+        [String]$Service = "None",
+        [Parameter(Mandatory = $false)]
         [ValidateSet("5.1","6.0-preview.4")]
         [String]$ApiVersion = 5.1
     )
 
-    $FullUri = "https://vsrm.dev.azure.com/${ENV:AZURE_DEVOPS_ORGANIZATION}/${ENV:AZURE_DEVOPS_PROJECT}/_apis/${Uri}?api-version=${ApiVersion}"
+
+    switch($Service){
+        "VSRM" {
+            $ApiService = "vsrm.dev.azure.com"
+            break
+        }
+
+        default {
+            $ApiService = "dev.azure.com"
+        }
+    }
+
+    $FullUri = "https://${ApiService}/${ENV:AZURE_DEVOPS_ORGANIZATION}/${ENV:AZURE_DEVOPS_PROJECT}/_apis/${Uri}?api-version=${ApiVersion}"
 
     $AuthenticationToken = $ENV:AZURE_DEVOPS_ACCESS_TOKEN
 
@@ -177,45 +208,15 @@ function Invoke-VstsRestMethod {
         Accept        = "application/json"
     }
 
-    Invoke-RestMethod -Method GET -Uri $FullUri -Headers $Headers -Verbose:$VerbosePreference
+    try {
+        Invoke-RestMethod -Method GET -Uri $FullUri -Headers $Headers -ErrorAction Stop -Verbose:$VerbosePreference
+    } catch {
+        $PSCmdlet.ThrowTerminatingError($_)
+    }
 }
-
-function Get-BuildOutcomeCount {
-    <#
-    .SYNOPSIS
-    Get the number of builds for the current project.
-
-    .DESCRIPTION
-    Get the number of builds for the current project.
-
-    .PARAMETER EntitySet
-    The name of the entity set
-
-    .PARAMETER Outcome
-    The build outcome to evaluate
-    #>
-
-    [CmdletBinding()]
-    Param(
-        [Parameter(Mandatory = $true)]
-        [string]$EntitySet,
-        [Parameter(Mandatory = $true)]
-        [string]$Outcome
-    )
-
-    Write-Information "Invoking Get-BuildOutcomeCount on EntitySet '${EntitySet}' for Outcome '${Outcome}'"
-
-    $Query = @"
-`$apply=filter((BuildOutcome eq '${Outcome}') and BuildPipeline/BuildPipelineName ne null)
-"@
-
-    (Invoke-ODataRestMethod -EntitySet "${EntitySet}/`$count" -Query $Query -Verbose) -replace "ï»¿"
-}
-
 
 Export-ModuleMember -Function @(
     "Send-LogAnalyticsPayload",
     "Invoke-ODataRestMethod",
-    "Invoke-VstsRestMethod",
-    "Get-BuildOutcomeCount"
+    "Invoke-VstsRestMethod"
 )

@@ -31,6 +31,13 @@ steps:
     archiveType: zip
     archiveFile: '$(Build.ArtifactStagingDirectory)/SFA.DAS.Monitoring.Functions.zip'
 
+- task: ArchiveFiles@2
+  inputs:
+    rootFolderOrFile: '$(Build.SourcesDirectory)/src/SFA.DAS.AzureDevOps.Metrics.Functions'
+    includeRootFolder: false
+    archiveType: zip
+    archiveFile: '$(Build.ArtifactStagingDirectory)/SFA.DAS.AzureDevOps.Metrics.Functions.zip'
+
 - task: PublishBuildArtifacts@1
   displayName: Publish Artifact
   inputs:

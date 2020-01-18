@@ -41,11 +41,7 @@
     },
     "azureDevOpsBuildDurationQueryFromDays": {
       "type": "int",
-      "defaultValue": 1
-    },
-    "azureDevOpsBuildDurationResultsPerSet": {
-      "type": "int",
-      "defaultValue": 100
+      "defaultValue": 30
     },
     "azureDevOpsMetricCronSchedule": {
       "type": "string",
@@ -60,7 +56,9 @@
     "deploymentUrlBase": "https://raw.githubusercontent.com/SkillsFundingAgency/das-platform-building-blocks/master/templates/",
     "resourceNamePrefix": "[toLower(concat('das-', parameters('resourceEnvironmentName'),'-', parameters('serviceName')))]",
     "consumptionPlanName": "[concat(variables('resourceNamePrefix'),'-asp')]",
-    "functionAppName": "[concat(variables('resourceNamePrefix'),'-fa')]"
+    "monitoringFunctionAppName": "[concat(variables('resourceNamePrefix'),'-fa')]",
+    "metricsFunctionAppName": "[concat(variables('resourceNamePrefix'),'-fa')]"
+
   },
   "resources": [
     {
@@ -102,7 +100,7 @@
     },
     {
       "apiVersion": "2017-05-10",
-      "name": "function-app",
+      "name": "monitoring-function-app",
       "type": "Microsoft.Resources/deployments",
       "properties": {
         "mode": "Incremental",
@@ -112,7 +110,7 @@
         },
         "parameters": {
           "functionAppName": {
-            "value": "[variables('functionAppName')]"
+            "value": "[variables('monitoringFunctionAppName')]"
           },
           "appServicePlanName": {
             "value": "[variables('consumptionPlanName')]"
@@ -160,7 +158,7 @@
               },
               {
                 "name": "AppName",
-                "value": "das-plmtr-jobs"
+                "value": "das-platform-monitoring-jobs"
               },
               {
                 "name": "SLACK_USERNAME",
@@ -177,6 +175,81 @@
               {
                 "name": "SLACK_WEBHOOK_URI",
                 "value": "[parameters('slackWebhookUri')]"
+              },
+              {
+                "name": "FUNCTIONS_WORKER_RUNTIME",
+                "value": "powershell"
+              }
+            ]
+          }
+        }
+      },
+      "dependsOn": [
+        "function-app-insights",
+        "consumption-plan"
+      ]
+    },
+    {
+      "apiVersion": "2017-05-10",
+      "name": "metrics-function-app",
+      "type": "Microsoft.Resources/deployments",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(variables('deploymentUrlBase'),'function-app.json')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "functionAppName": {
+            "value": "[variables('metricsFunctionAppName')]"
+          },
+          "appServicePlanName": {
+            "value": "[variables('consumptionPlanName')]"
+          },
+          "appServicePlanResourceGroup": {
+            "value": "[resourceGroup().name]"
+          },
+          "functionAppAppSettings": {
+            "value": [
+              {
+                "name": "PSWorkerInProcConcurrencyUpperBound",
+                "value": 5
+              },
+              {
+                "name": "AzureWebJobsStorage",
+                "value": "[parameters('sharedStorageAccountConnectionString')]"
+              },
+              {
+                "name": "AzureWebJobsDashboard",
+                "value": "[parameters('sharedStorageAccountConnectionString')]"
+              },
+              {
+                "name": "AzureWebJobsSecretStorageType",
+                "value": "Files"
+              },
+              {
+                "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+                "value": "[reference('function-app-insights').outputs.InstrumentationKey.value]"
+              },
+              {
+                "name": "FUNCTIONS_EXTENSION_VERSION",
+                "value": "~2"
+              },
+              {
+                "name": "EnvironmentName",
+                "value": "[toUpper(parameters('environmentName'))]"
+              },
+              {
+                "name": "LoggingRedisConnectionString",
+                "value": "[parameters('loggingRedisConnectionString')]"
+              },
+              {
+                "name": "ConfigurationStorageConnectionString",
+                "value": "[parameters('configurationStorageConnectionString')]"
+              },
+              {
+                "name": "AppName",
+                "value": "das-platform-metrics-jobs"
               },
               {
                 "name": "FUNCTIONS_WORKER_RUNTIME",
@@ -207,10 +280,6 @@
                 "value": "[parameters('azureDevOpsBuildDurationQueryFromDays')]"
               },
               {
-                "name": "AZURE_DEVOPS_BUILD_DURATION_RESULTSPERSET",
-                "value": "[parameters('azureDevOpsBuildDurationResultsPerSet')]"
-              },
-              {
                 "name": "AZURE_DEVOPS_METRIC_CRON_SCHEDULE",
                 "value": "[parameters('azureDevOpsMetricCronSchedule')]"
               },
@@ -229,9 +298,13 @@
     }
   ],
   "outputs": {
-    "FunctionAppName": {
+    "MonitoringFunctionAppName": {
       "type": "string",
-      "value": "[variables('functionAppName')]"
+      "value": "[variables('monitoringFunctionAppName')]"
+    },
+    "MetricsFunctionAppName": {
+      "type": "string",
+      "value": "[variables('metricsFunctionAppName')]"
     }
   }
 }
