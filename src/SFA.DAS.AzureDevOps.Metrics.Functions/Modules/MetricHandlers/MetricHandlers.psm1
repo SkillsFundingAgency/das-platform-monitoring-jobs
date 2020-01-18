@@ -43,7 +43,7 @@ function Get-DeploymentDuration {
 
                 $DeploymentUri = "release/deployments?definitionId=${DefinitionId}&definitionEnvironmentId=$($_.Id)&deploymentStatus=succeeded&latestAttemptsOnly=true&`$top=1&"
 
-                $Response = (Invoke-VstsRestMethod -Uri $DeploymentUri -Server VSRM -ApiVersion $DefaultApiVersion).Value |
+                $Response = (Invoke-VstsRestMethod -Uri $DeploymentUri -Service VSRM -ApiVersion $DefaultApiVersion).Value |
                 Select-Object -Property @{Name = "DefinitionId"; Expression = { $DefinitionId } },
                 @{Name = "DefinitionName"; Expression = { $DefinitionName } },
                 @{Name = "DefinitionPath"; Expression = { $DefinitionPath } },
