@@ -49,7 +49,7 @@
     },
     "azureDevOpsMetricEnvironments": {
       "type": "string",
-      "defaultValue": "DEV,PROD"
+      "defaultValue": "PROD"
     }
   },
   "variables": {
@@ -301,7 +301,7 @@
               },
               {
                 "name": "AZURE_DEVOPS_TEST_QUERYFROMDAYS",
-                "value": "[parameters('azureDevOpsBuildQueryFromDays')]"
+                "value": "[parameters('azureDevOpsTestQueryFromDays')]"
               },
               {
                 "name": "AZURE_DEVOPS_METRIC_ENVIRONMENTS",
