@@ -104,14 +104,20 @@ function Send-LogAnalyticsPayload {
         }
 
         try {
-            Write-Information "Sending metric payload to Log Analytics workspace $WorkspaceID} as type ${LogType}"
+            Write-Information "Sending metric payload to Log Analytics workspace ${WorkspaceID} as type ${LogType}"
             Invoke-RestMethod @InvokeRestMethodParameters -ErrorAction Stop
         } catch {
             $PSCmdlet.ThrowTerminatingError($_)
         }
 
     } else {
-        $ErrorRecord = Write-Error -Message "No data was found in the Body parameter. Not proessing."
+
+        $Exception = [Exception]::("The Body parameter was null or empty. The function won't continue because a payload is required.", $_)
+        $ErrorRecord = [System.Management.Automation.ErrorRecord]::new(
+            $Exception,
+            "1",
+            [System.Management.Automation.ErrorCategory]::InvalidData
+        )
         $PSCmdlet.ThrowTerminatingError($ErrorRecord)
     }
 }
@@ -182,8 +188,8 @@ function Invoke-VstsRestMethod {
         [ValidateSet("VSRM", "None")]
         [String]$Service = "None",
         [Parameter(Mandatory = $false)]
-        [ValidateSet("5.1","6.0-preview.4")]
-        [String]$ApiVersion = 5.1
+        [ValidateSet("5.1","6.0-preview.2","6.0-preview.4","6.0-preview.6")]
+        [String]$ApiVersion
     )
 
 
@@ -209,7 +215,21 @@ function Invoke-VstsRestMethod {
     }
 
     try {
-        Invoke-RestMethod -Method GET -Uri $FullUri -Headers $Headers -ErrorAction Stop -Verbose:$VerbosePreference
+        $InvokeRestMethodParameters = @{
+            Method  = "GET"
+            Uri = $FullUri
+            Headers = $Headers
+            ErrorAction = "Stop"
+            ResponseHeadersVariable = "ResponseHeaders"
+        }
+
+        $Response = Invoke-RestMethod @InvokeRestMethodParameters -Verbose:$VerbosePreference
+
+        [PSCustomObject]@{
+            Headers = $ResponseHeaders
+            Response = $Response
+        }
+
     } catch {
         $PSCmdlet.ThrowTerminatingError($_)
     }
