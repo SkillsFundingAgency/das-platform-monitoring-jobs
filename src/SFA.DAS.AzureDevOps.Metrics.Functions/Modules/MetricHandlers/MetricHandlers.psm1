@@ -137,7 +137,10 @@ function Get-TestRun {
                     ResultWarningCount,
                     ResultErrorCount,
                     ResultNotApplicableCount,
-                    ResultNotImpactedCount
+                    ResultNotImpactedCount,
+                    @{Name = "PassPercentage"; Expression = { $_.ResultPassCount / $_.ResultCount * 100  } },
+                    @{Name = "FailurePercentage"; Expression = { $_.ResultFailCount / $_.ResultCount * 100  } }
+
 
                     $null = $MetricResult.Add($TestRun)
 
