@@ -39,13 +39,13 @@
     "azureDevOpsAccessToken": {
       "type": "string"
     },
-    "azureDevOpsBuildDurationQueryFromDays": {
+    "azureDevOpsBuildQueryFromDays": {
+      "type": "int",
+      "defaultValue": 1
+    },
+    "azureDevOpsTestQueryFromDays": {
       "type": "int",
       "defaultValue": 30
-    },
-    "azureDevOpsMetricCronSchedule": {
-      "type": "string",
-      "defaultValue": "0 */5 * * * *"
     },
     "azureDevOpsMetricEnvironments": {
       "type": "string",
@@ -296,12 +296,12 @@
                 "value": "[parameters('azureDevOpsAccessToken')]"
               },
               {
-                "name": "AZURE_DEVOPS_BUILD_DURATION_QUERYFROMDAYS",
-                "value": "[parameters('azureDevOpsBuildDurationQueryFromDays')]"
+                "name": "AZURE_DEVOPS_BUILD_QUERYFROMDAYS",
+                "value": "[parameters('azureDevOpsBuildQueryFromDays')]"
               },
               {
-                "name": "AZURE_DEVOPS_METRIC_CRON_SCHEDULE",
-                "value": "[parameters('azureDevOpsMetricCronSchedule')]"
+                "name": "AZURE_DEVOPS_TEST_QUERYFROMDAYS",
+                "value": "[parameters('azureDevOpsBuildQueryFromDays')]"
               },
               {
                 "name": "AZURE_DEVOPS_METRIC_ENVIRONMENTS",
