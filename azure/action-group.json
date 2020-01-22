@@ -12,7 +12,7 @@
   "variables": {
     "deploymentUrlBase": "https://raw.githubusercontent.com/SkillsFundingAgency/das-platform-building-blocks/master/templates/",
     "resourceNamePrefix": "[toLower(concat('das-', parameters('resourceEnvironmentName'),'-', parameters('serviceName')))]",
-    "functionAppName": "[concat(variables('resourceNamePrefix'),'-fa')]",
+    "functionAppName": "[concat(variables('resourceNamePrefix'), 'mtr','-fa')]",
     "actionGroupName": "[concat(variables('resourceNamePrefix'),'-algr')]",
     "actionGroupShortName": "DAS Alerts",
     "actionGroupWebhookReceiverName": "SlackWebhook",
