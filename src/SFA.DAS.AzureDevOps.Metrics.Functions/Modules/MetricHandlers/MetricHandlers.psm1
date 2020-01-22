@@ -28,7 +28,7 @@ function Get-DeploymentDuration {
 
         $DefinitionsUri = "release/definitions?`$expand=Environments&queryOrder=nameAscending&"
         $DefinitionList = (Invoke-VstsRestMethod -Uri $DefinitionsUri -Service VSRM -ApiVersion $DefaultApiVersion).Response.Value |
-        Where-Object { $_.Path.TrimStart("\") -notin $ExcludedDefinitionPaths } |
+        Where-Object { $_.Path.TrimStart("\") -notmatch $ExcludedDefinitionPaths } |
             Select-Object -Property Id, Name, @{ Name = "Path"; Expression = { $_.Path.TrimStart("\")} }, Environments
 
         $DefinitionList | ForEach-Object {
