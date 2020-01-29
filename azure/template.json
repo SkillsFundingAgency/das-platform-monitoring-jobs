@@ -21,7 +21,13 @@
     "sharedStorageAccountConnectionString": {
       "type": "securestring"
     },
-    "slackWebhookUri": {
+    "slackWebhookUriDasAlerts": {
+      "type": "securestring"
+    },
+    "slackWebhookUriZenDeskDev": {
+      "type": "securestring"
+    },
+    "slackWebhookUriZenDeskLive": {
       "type": "securestring"
     },
     "logAnalyticsWorkspaceId": {
@@ -189,12 +195,28 @@
                 "value": "das-alerts"
               },
               {
+                "name": "SLACK_ZENDESKDEV_CHANNEL",
+                "value": "zendesk-dev"
+              },
+              {
+                "name": "SLACK_ZENDESKLIVE_CHANNEL",
+                "value": "zendesk-live"
+              },
+              {
                 "name": "SLACK_ICON_EMOJI",
                 "value": ":mega:"
               },
               {
-                "name": "SLACK_WEBHOOK_URI",
-                "value": "[parameters('slackWebhookUri')]"
+                "name": "SLACK_WEBHOOK_URI_DAS_ALERTS",
+                "value": "[parameters('slackWebhookUriDasAlerts')]"
+              },
+              {
+                "name": "SLACK_WEBHOOK_URI_ZENDESK_DEV",
+                "value": "[parameters('slackWebhookUriZenDeskDev')]"
+              },
+              {
+                "name": "SLACK_WEBHOOK_URI_ZENDESK_LIVE",
+                "value": "[parameters('slackWebhookUriZenDeskLive')]"
               },
               {
                 "name": "FUNCTIONS_WORKER_RUNTIME",

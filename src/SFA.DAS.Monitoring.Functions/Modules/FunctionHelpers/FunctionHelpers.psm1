@@ -103,15 +103,34 @@ hashtable.  A hashtable representing the message to send to slack.
 
     Param(
         [Parameter(Mandatory = $true)]
-        [hashtable]$Message
+        [hashtable]$Message,
+        [Parameter(Mandatory = $true)]
+        [string] $Channel
     )
 
     try {
-
         Write-Information "Submitting slack message payload"
         $SerializedMessage = "payload=$($Message | ConvertTo-Json -Compress)"
         Write-Information $SerializedMessage
-        Invoke-WebRequest -Uri $Configuration.Get("SLACK_WEBHOOK_URI") -Method POST -UseBasicParsing -Body $SerializedMessage
+        switch ($Channel) {
+
+            "zendesk-dev" {
+                $SlackWebhookUri = $Configuration.Get("SLACK_WEBHOOK_URI_ZENDESK_DEV")
+                break
+            }
+
+            "zendesk-live" {
+                $SlackWebhookUri = $Configuration.Get("SLACK_WEBHOOK_URI_ZENDESK_LIVE")
+                break
+            }
+
+            default {
+                $SlackWebhookUri = $Configuration.Get("SLACK_WEBHOOK_URI_DAS_ALERTS")
+                break
+            }
+
+        }
+        Invoke-WebRequest -Uri $SlackWebhookUri -Method POST -UseBasicParsing -Body $SerializedMessage
     }
     catch {
         $ErrorResponse = $_.Exception.Message
