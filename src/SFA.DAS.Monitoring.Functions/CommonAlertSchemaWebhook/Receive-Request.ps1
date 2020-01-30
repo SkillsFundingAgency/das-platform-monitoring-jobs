@@ -14,14 +14,29 @@ try {
 
     $AlertData = $Request.Body.data
 
-    $Channel = $Configuration.Get("SLACK_DEFAULT_CHANNEL")
-    if ($Request.Query.Channel) {
-        $Channel = $Request.Query.Channel
-        Write-Information "Overriding SLACK_DEFAULT_CHANNEL with parameter $Channel"
+    switch -wildcard ($AlertData.essentials.alertRule){
+
+        "TEST - ZenDesk*" {
+            $Channel = $Configuration.Get("SLACK_ZENDESKDEV_CHANNEL")
+            Write-Information "Overriding SLACK_DEFAULT_CHANNEL with Slack channel $channel"
+            break
+        }
+
+        "PROD - ZenDesk*" {
+            $Channel = $Configuration.Get("SLACK_ZENDESKLIVE_CHANNEL")
+            Write-Information "Overriding SLACK_DEFAULT_CHANNEL with Slack channel $channel"
+            break
+        }
+
+        default {
+            $Channel = $Configuration.Get("SLACK_DEFAULT_CHANNEL")
+            break
+        }
+
     }
 
     $Message = New-Message -AlertData $AlertData -Channel $Channel
-    Send-SlackMessage -Message $Message
+    Send-SlackMessage -Message $Message -Channel $Channel
     Push-OutputBindingWrapper -StatusCode 202 -Body "Message accepted"
 
 }
