@@ -155,10 +155,6 @@
                 "value": "[parameters('sharedStorageAccountConnectionString')]"
               },
               {
-                "name": "AzureWebJobsDashboard",
-                "value": "[parameters('sharedStorageAccountConnectionString')]"
-              },
-              {
                 "name": "AzureWebJobsSecretStorageType",
                 "value": "Files"
               },
@@ -259,10 +255,6 @@
               },
               {
                 "name": "AzureWebJobsStorage",
-                "value": "[parameters('sharedStorageAccountConnectionString')]"
-              },
-              {
-                "name": "AzureWebJobsDashboard",
                 "value": "[parameters('sharedStorageAccountConnectionString')]"
               },
               {
