@@ -75,12 +75,24 @@
     },
     "subnetDelegations": {
       "type": "array"
+    },
+    "aspSize": {
+      "type": "string",
+      "defaultValue": "1"
+    },
+    "aspInstances": {
+      "type": "int",
+      "defaultValue": 1
+    },
+    "aspTier": {
+      "type": "string",
+      "defaultValue": "Standard"
     }
   },
   "variables": {
     "deploymentUrlBase": "https://raw.githubusercontent.com/SkillsFundingAgency/das-platform-building-blocks/master/templates/",
     "resourceNamePrefix": "[toLower(concat('das-', parameters('resourceEnvironmentName'),'-', parameters('serviceName')))]",
-    "consumptionPlanName": "[concat(variables('resourceNamePrefix'),'-asp')]",
+    "appServicePlanName": "[concat(variables('resourceNamePrefix'),'-asp')]",
     "monitoringFunctionAppName": "[concat(variables('resourceNamePrefix'), 'mtr' ,'-fa')]",
     "metricsFunctionAppName": "[concat(variables('resourceNamePrefix'), 'met','-fa')]"
 
@@ -88,7 +100,7 @@
   "resources": [
     {
       "apiVersion": "2017-05-10",
-      "name": "consumption-plan-subnet",
+      "name": "asp-subnet",
       "resourceGroup": "[parameters('sharedEnvResourceGroup')]",
       "type": "Microsoft.Resources/deployments",
       "properties": {
@@ -118,17 +130,26 @@
     },
     {
       "apiVersion": "2017-05-10",
-      "name": "consumption-plan",
+      "name": "app-service-plan",
       "type": "Microsoft.Resources/deployments",
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "[concat(variables('deploymentUrlBase'),'consumption-plan.json')]",
+          "uri": "[concat(variables('deploymentUrlBase'),'app-service-plan.json')]",
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
-          "consumptionPlanName": {
-            "value": "[variables('consumptionPlanName')]"
+          "appServicePlanName": {
+            "value": "[variables('appServicePlanName')]"
+          },
+          "aspSize": {
+            "value": "[parameters('aspSize')]"
+          },
+          "aspInstances": {
+            "value": "[parameters('aspInstances')]"
+          },
+          "nonASETier": {
+            "value": "[parameters('aspTier')]"
           }
         }
       }
@@ -188,13 +209,13 @@
             "value": "[variables('monitoringFunctionAppName')]"
           },
           "appServicePlanName": {
-            "value": "[variables('consumptionPlanName')]"
+            "value": "[variables('appServicePlanName')]"
           },
           "appServicePlanResourceGroup": {
             "value": "[resourceGroup().name]"
           },
           "subnetResourceId": {
-            "value": "[reference('consumption-plan-subnet').outputs.SubnetResourceId.value]"
+            "value": "[reference('asp-subnet').outputs.SubnetResourceId.value]"
           },
           "functionAppAppSettings": {
             "value": [
@@ -280,7 +301,7 @@
       },
       "dependsOn": [
         "monitoring-function-app-insights",
-        "consumption-plan"
+        "app-service-plan"
       ]
     },
     {
@@ -298,13 +319,13 @@
             "value": "[variables('metricsFunctionAppName')]"
           },
           "appServicePlanName": {
-            "value": "[variables('consumptionPlanName')]"
+            "value": "[variables('appServicePlanName')]"
           },
           "appServicePlanResourceGroup": {
             "value": "[resourceGroup().name]"
           },
           "subnetResourceId": {
-            "value": "[reference('consumption-plan-subnet').outputs.SubnetResourceId.value]"
+            "value": "[reference('asp-subnet').outputs.SubnetResourceId.value]"
           },
           "functionAppAppSettings": {
             "value": [
@@ -390,7 +411,7 @@
       },
       "dependsOn": [
         "metrics-function-app-insights",
-        "consumption-plan"
+        "app-service-plan"
       ]
     }
   ],
