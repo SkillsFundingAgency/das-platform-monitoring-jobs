@@ -43,7 +43,7 @@
       "type": "string"
     },
     "azureDevOpsAccessToken": {
-      "type": "string"
+      "type": "securestring"
     },
     "azureDevOpsBuildQueryFromDays": {
       "type": "int",
@@ -201,7 +201,7 @@
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "[concat(variables('deploymentUrlBase'),'function-app.json')]",
+          "uri": "[concat(variables('deploymentUrlBase'),'function-app-v2.json')]",
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
@@ -218,84 +218,86 @@
             "value": "[reference('asp-subnet').outputs.SubnetResourceId.value]"
           },
           "functionAppAppSettings": {
-            "value": [
-              {
-                "name": "PSWorkerInProcConcurrencyUpperBound",
-                "value": 5
-              },
-              {
-                "name": "AzureWebJobsStorage",
-                "value": "[parameters('sharedStorageAccountConnectionString')]"
-              },
-              {
-                "name": "AzureWebJobsSecretStorageType",
-                "value": "Files"
-              },
-              {
-                "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
-                "value": "[reference('monitoring-function-app-insights').outputs.InstrumentationKey.value]"
-              },
-              {
-                "name": "FUNCTIONS_EXTENSION_VERSION",
-                "value": "[parameters('functionsExtensionVersion')]"
-              },
-              {
-                "name": "FUNCTIONS_WORKER_RUNTIME_VERSION",
-                "value": "~7"
-              },
-              {
-                "name": "EnvironmentName",
-                "value": "[toUpper(parameters('environmentName'))]"
-              },
-              {
-                "name": "LoggingRedisConnectionString",
-                "value": "[parameters('loggingRedisConnectionString')]"
-              },
-              {
-                "name": "ConfigurationStorageConnectionString",
-                "value": "[parameters('configurationStorageConnectionString')]"
-              },
-              {
-                "name": "AppName",
-                "value": "das-platform-monitoring-jobs"
-              },
-              {
-                "name": "SLACK_USERNAME",
-                "value": "AzureAlerts"
-              },
-              {
-                "name": "SLACK_DEFAULT_CHANNEL",
-                "value": "das-alerts"
-              },
-              {
-                "name": "SLACK_ZENDESKDEV_CHANNEL",
-                "value": "zendesk-dev"
-              },
-              {
-                "name": "SLACK_ZENDESKLIVE_CHANNEL",
-                "value": "zendesk-live"
-              },
-              {
-                "name": "SLACK_ICON_EMOJI",
-                "value": ":mega:"
-              },
-              {
-                "name": "SLACK_WEBHOOK_URI_DAS_ALERTS",
-                "value": "[parameters('slackWebhookUriDasAlerts')]"
-              },
-              {
-                "name": "SLACK_WEBHOOK_URI_ZENDESK_DEV",
-                "value": "[parameters('slackWebhookUriZenDeskDev')]"
-              },
-              {
-                "name": "SLACK_WEBHOOK_URI_ZENDESK_LIVE",
-                "value": "[parameters('slackWebhookUriZenDeskLive')]"
-              },
-              {
-                "name": "FUNCTIONS_WORKER_RUNTIME",
-                "value": "powershell"
-              }
-            ]
+            "value": {
+              "array": [
+                {
+                  "name": "PSWorkerInProcConcurrencyUpperBound",
+                  "value": 5
+                },
+                {
+                  "name": "AzureWebJobsStorage",
+                  "value": "[parameters('sharedStorageAccountConnectionString')]"
+                },
+                {
+                  "name": "AzureWebJobsSecretStorageType",
+                  "value": "Files"
+                },
+                {
+                  "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+                  "value": "[reference('monitoring-function-app-insights').outputs.InstrumentationKey.value]"
+                },
+                {
+                  "name": "FUNCTIONS_EXTENSION_VERSION",
+                  "value": "[parameters('functionsExtensionVersion')]"
+                },
+                {
+                  "name": "FUNCTIONS_WORKER_RUNTIME_VERSION",
+                  "value": "~7"
+                },
+                {
+                  "name": "EnvironmentName",
+                  "value": "[toUpper(parameters('environmentName'))]"
+                },
+                {
+                  "name": "LoggingRedisConnectionString",
+                  "value": "[parameters('loggingRedisConnectionString')]"
+                },
+                {
+                  "name": "ConfigurationStorageConnectionString",
+                  "value": "[parameters('configurationStorageConnectionString')]"
+                },
+                {
+                  "name": "AppName",
+                  "value": "das-platform-monitoring-jobs"
+                },
+                {
+                  "name": "SLACK_USERNAME",
+                  "value": "AzureAlerts"
+                },
+                {
+                  "name": "SLACK_DEFAULT_CHANNEL",
+                  "value": "das-alerts"
+                },
+                {
+                  "name": "SLACK_ZENDESKDEV_CHANNEL",
+                  "value": "zendesk-dev"
+                },
+                {
+                  "name": "SLACK_ZENDESKLIVE_CHANNEL",
+                  "value": "zendesk-live"
+                },
+                {
+                  "name": "SLACK_ICON_EMOJI",
+                  "value": ":mega:"
+                },
+                {
+                  "name": "SLACK_WEBHOOK_URI_DAS_ALERTS",
+                  "value": "[parameters('slackWebhookUriDasAlerts')]"
+                },
+                {
+                  "name": "SLACK_WEBHOOK_URI_ZENDESK_DEV",
+                  "value": "[parameters('slackWebhookUriZenDeskDev')]"
+                },
+                {
+                  "name": "SLACK_WEBHOOK_URI_ZENDESK_LIVE",
+                  "value": "[parameters('slackWebhookUriZenDeskLive')]"
+                },
+                {
+                  "name": "FUNCTIONS_WORKER_RUNTIME",
+                  "value": "powershell"
+                }
+              ]
+            }
           }
         }
       },
@@ -311,7 +313,7 @@
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "[concat(variables('deploymentUrlBase'),'function-app.json')]",
+          "uri": "[concat(variables('deploymentUrlBase'),'function-app-v2.json')]",
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
@@ -328,84 +330,86 @@
             "value": "[reference('asp-subnet').outputs.SubnetResourceId.value]"
           },
           "functionAppAppSettings": {
-            "value": [
-              {
-                "name": "PSWorkerInProcConcurrencyUpperBound",
-                "value": 5
-              },
-              {
-                "name": "AzureWebJobsStorage",
-                "value": "[parameters('sharedStorageAccountConnectionString')]"
-              },
-              {
-                "name": "AzureWebJobsSecretStorageType",
-                "value": "Files"
-              },
-              {
-                "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
-                "value": "[reference('metrics-function-app-insights').outputs.InstrumentationKey.value]"
-              },
-              {
-                "name": "FUNCTIONS_EXTENSION_VERSION",
-                "value": "[parameters('functionsExtensionVersion')]"
-              },
-              {
-                "name": "FUNCTIONS_WORKER_RUNTIME_VERSION",
-                "value": "~7"
-              },
-              {
-                "name": "EnvironmentName",
-                "value": "[toUpper(parameters('environmentName'))]"
-              },
-              {
-                "name": "LoggingRedisConnectionString",
-                "value": "[parameters('loggingRedisConnectionString')]"
-              },
-              {
-                "name": "ConfigurationStorageConnectionString",
-                "value": "[parameters('configurationStorageConnectionString')]"
-              },
-              {
-                "name": "AppName",
-                "value": "das-platform-metrics-jobs"
-              },
-              {
-                "name": "FUNCTIONS_WORKER_RUNTIME",
-                "value": "powershell"
-              },
-              {
-                "name": "LOG_ANALYTICS_WORKSPACE_ID",
-                "value": "[parameters('logAnalyticsWorkspaceId')]"
-              },
-              {
-                "name": "LOG_ANALYTICS_WORKSPACE_KEY",
-                "value": "[parameters('logAnalyticsWorkspaceKey')]"
-              },
-              {
-                "name": "AZURE_DEVOPS_ORGANIZATION",
-                "value": "[parameters('azureDevOpsOrganization')]"
-              },
-              {
-                "name": "AZURE_DEVOPS_PROJECT",
-                "value": "[parameters('azureDevOpsProject')]"
-              },
-              {
-                "name": "AZURE_DEVOPS_ACCESS_TOKEN",
-                "value": "[parameters('azureDevOpsAccessToken')]"
-              },
-              {
-                "name": "AZURE_DEVOPS_BUILD_QUERYFROMDAYS",
-                "value": "[parameters('azureDevOpsBuildQueryFromDays')]"
-              },
-              {
-                "name": "AZURE_DEVOPS_TEST_QUERYFROMDAYS",
-                "value": "[parameters('azureDevOpsTestQueryFromDays')]"
-              },
-              {
-                "name": "AZURE_DEVOPS_METRIC_ENVIRONMENTS",
-                "value": "[parameters('azureDevOpsMetricEnvironments')]"
-              }
-            ]
+            "value": {
+              "array": [
+                {
+                  "name": "PSWorkerInProcConcurrencyUpperBound",
+                  "value": 5
+                },
+                {
+                  "name": "AzureWebJobsStorage",
+                  "value": "[parameters('sharedStorageAccountConnectionString')]"
+                },
+                {
+                  "name": "AzureWebJobsSecretStorageType",
+                  "value": "Files"
+                },
+                {
+                  "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+                  "value": "[reference('metrics-function-app-insights').outputs.InstrumentationKey.value]"
+                },
+                {
+                  "name": "FUNCTIONS_EXTENSION_VERSION",
+                  "value": "[parameters('functionsExtensionVersion')]"
+                },
+                {
+                  "name": "FUNCTIONS_WORKER_RUNTIME_VERSION",
+                  "value": "~7"
+                },
+                {
+                  "name": "EnvironmentName",
+                  "value": "[toUpper(parameters('environmentName'))]"
+                },
+                {
+                  "name": "LoggingRedisConnectionString",
+                  "value": "[parameters('loggingRedisConnectionString')]"
+                },
+                {
+                  "name": "ConfigurationStorageConnectionString",
+                  "value": "[parameters('configurationStorageConnectionString')]"
+                },
+                {
+                  "name": "AppName",
+                  "value": "das-platform-metrics-jobs"
+                },
+                {
+                  "name": "FUNCTIONS_WORKER_RUNTIME",
+                  "value": "powershell"
+                },
+                {
+                  "name": "LOG_ANALYTICS_WORKSPACE_ID",
+                  "value": "[parameters('logAnalyticsWorkspaceId')]"
+                },
+                {
+                  "name": "LOG_ANALYTICS_WORKSPACE_KEY",
+                  "value": "[parameters('logAnalyticsWorkspaceKey')]"
+                },
+                {
+                  "name": "AZURE_DEVOPS_ORGANIZATION",
+                  "value": "[parameters('azureDevOpsOrganization')]"
+                },
+                {
+                  "name": "AZURE_DEVOPS_PROJECT",
+                  "value": "[parameters('azureDevOpsProject')]"
+                },
+                {
+                  "name": "AZURE_DEVOPS_ACCESS_TOKEN",
+                  "value": "[parameters('azureDevOpsAccessToken')]"
+                },
+                {
+                  "name": "AZURE_DEVOPS_BUILD_QUERYFROMDAYS",
+                  "value": "[parameters('azureDevOpsBuildQueryFromDays')]"
+                },
+                {
+                  "name": "AZURE_DEVOPS_TEST_QUERYFROMDAYS",
+                  "value": "[parameters('azureDevOpsTestQueryFromDays')]"
+                },
+                {
+                  "name": "AZURE_DEVOPS_METRIC_ENVIRONMENTS",
+                  "value": "[parameters('azureDevOpsMetricEnvironments')]"
+                }
+              ]
+            }
           }
         }
       },
