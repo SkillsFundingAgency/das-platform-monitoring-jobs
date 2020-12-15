@@ -35,7 +35,7 @@
             "value": "[parameters('actionGroupResourceId')]"
           },
           "severity": {
-            "value": "Sev0"
+            "value": "Sev3"
           }
         }
       },
