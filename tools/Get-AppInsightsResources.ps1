@@ -18,4 +18,4 @@ foreach ($AppInsightsResource in $AppInsightsResources) {
 
 $AppInsightsResourcesArrayString = $AppInsightsResourcesArray | ConvertTo-Json -Compress
 
-Write-Output ("##vso[task.setvariable variable=APP_INSIGHTS_RESOURCES_ARRAY_STRING]$($AppInsightsResourcesArrayString)")
+Write-Output "##vso[task.setvariable variable=APP_INSIGHTS_RESOURCES_ARRAY_STRING]$($AppInsightsResourcesArrayString)"
