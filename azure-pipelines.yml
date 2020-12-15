@@ -22,6 +22,7 @@ steps:
     sourceFolder: '$(Build.SourcesDirectory)'
     contents: |
       azure/**
+      tools/Get-AppInsightsResources.ps1
     targetFolder: $(Build.ArtifactStagingDirectory)
 
 - task: ArchiveFiles@2
