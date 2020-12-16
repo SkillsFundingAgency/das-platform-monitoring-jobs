@@ -1,0 +1,50 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "appInsightsResourcesArray": {
+      "type": "array"
+    },
+    "actionGroupResourceId": {
+      "type": "string"
+    }
+  },
+  "variables": {
+    "deploymentUrlBase": "https://raw.githubusercontent.com/SkillsFundingAgency/das-platform-building-blocks/master/templates/"
+  },
+  "resources": [
+    {
+      "apiVersion": "2020-06-01",
+      "name": "[concat('failure-anomalies-', parameters('appInsightsResourcesArray')[copyIndex()].appInsightsName)]",
+      "resourceGroup": "[parameters('appInsightsResourcesArray')[copyIndex()].appInsightsResourceGroup]",
+      "type": "Microsoft.Resources/deployments",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(variables('deploymentUrlBase'),'failure-anomalies-alert.json')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "appInsightsName": {
+            "value": "[parameters('appInsightsResourcesArray')[copyIndex()].appInsightsName]"
+          },
+          "appInsightsResourceGroup": {
+            "value": "[parameters('appInsightsResourcesArray')[copyIndex()].appInsightsResourceGroup]"
+          },
+          "actionGroupResourceId": {
+            "value": "[parameters('actionGroupResourceId')]"
+          },
+          "severity": {
+            "value": "Sev0"
+          }
+        }
+      },
+      "copy": {
+        "name": "failureAnomaliesLoop",
+        "count": "[length(parameters('appInsightsResourcesArray'))]",
+        "mode": "Parallel"
+      }
+    }
+  ],
+  "outputs": {}
+}
