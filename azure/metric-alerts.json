@@ -1,5 +1,5 @@
 {
-  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json",
   "contentVersion": "1.0.0.0",
   "parameters": {
     "metricAlertsArray": {
@@ -42,7 +42,7 @@
           },
           "resourceIdScopeList": {
             "value": [
-              "[resourceId(parameters('metricAlertsArray')[copyIndex()].appInsightsResourceGroup, 'microsoft.insights/components', parameters('metricAlertsArray')[copyIndex()].appInsightsName)]"
+              "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', parameters('metricAlertsArray')[copyIndex()].appInsightsResourceGroup, '/providers/microsoft.insights/components/', parameters('metricAlertsArray')[copyIndex()].appInsightsName)]"
             ]
           },
           "metricNamepace": {
