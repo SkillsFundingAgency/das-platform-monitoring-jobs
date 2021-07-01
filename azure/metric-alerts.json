@@ -5,22 +5,10 @@
     "metricAlertsArray": {
       "type": "array",
       "metadata": {
-        "description": "The array of metric alert objects. E.g.
-        [
-            {
-                \"appInsightsResourceGroup\": \"das-pp-foo-rg\",
-                \"appInsightsName\": \"das-pp-foo-fa\",
-                \"metricName\": \"dependencies/failed\",
-                \"metricOperator\": \"GreaterThan\",
-                \"metricThreshold\": 0,
-                \"timeAggregation\": \"Count\",
-                \"windowSize\": \"P1D\",
-                \"evaluationFrequency\": \"PT1H\"
-            }
-        ]"
+        "description": "The array of metric alert objects."
       }
     },
-    "isMetricAlertEnabled": {
+    "areMetricAlertsEnabled": {
       "type": "bool",
       "metadata": {
         "description": "Specifies whether the alert is enabled."
@@ -59,7 +47,7 @@
             "value": 0
           },
           "isEnabled": {
-            "value": "[parameters('IsMetricAlertEnabled')]"
+            "value": "[parameters('areMetricAlertsEnabled')]"
           },
           "targetResourceType": {
             "value": "microsoft.insights/components"
