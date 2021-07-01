@@ -1,0 +1,106 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "metricAlertsArray": {
+      "type": "array",
+      "metadata": {
+        "description": "The array of metric alert objects. E.g.
+        [
+            {
+                \"appInsightsResourceGroup\": \"das-pp-foo-rg\",
+                \"appInsightsName\": \"das-pp-foo-fa\",
+                \"metricName\": \"dependencies/failed\",
+                \"metricOperator\": \"GreaterThan\",
+                \"metricThreshold\": 0,
+                \"timeAggregation\": \"Count\",
+                \"windowSize\": \"P1D\",
+                \"evaluationFrequency\": \"PT1H\"
+            }
+        ]"
+      }
+    },
+    "isMetricAlertEnabled": {
+      "type": "bool",
+      "metadata": {
+        "description": "Specifies whether the alert is enabled."
+      }
+    },
+    "actionGroupResourceId": {
+      "type": "string",
+      "metadata": {
+        "description": "The id of the action group to send the alert to."
+      }
+    }
+  },
+  "variables": {
+    "deploymentUrlBase": "https://raw.githubusercontent.com/SkillsFundingAgency/das-platform-building-blocks/master/templates/"
+  },
+  "resources": [
+    {
+      "apiVersion": "2020-10-01",
+      "name": "[concat('metric-alerts-', parameters('metricAlertsArray')[copyIndex()].appInsightsName)]",
+      "resourceGroup": "[parameters('metricAlertsArray')[copyIndex()].appInsightsResourceGroup]",
+      "type": "Microsoft.Resources/deployments",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(variables('deploymentUrlBase'),'metric-alert.json')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "alertName": {
+            "value": "[replace(concat(parameters('metricAlertsArray')[copyIndex()].appInsightsName, ' - ', parameters('metricAlertsArray')[copyIndex()].metricName), '/', '-')]"
+          },
+          "alertDescription": {
+            "value": "[concat(parameters('metricAlertsArray')[copyIndex()].metricName, ' ', parameters('metricAlertsArray')[copyIndex()].metricOperator, ' ', parameters('metricAlertsArray')[copyIndex()].metricThreshold)]"
+          },
+          "alertSeverity": {
+            "value": 0
+          },
+          "isEnabled": {
+            "value": "[parameters('IsMetricAlertEnabled')]"
+          },
+          "targetResourceType": {
+            "value": "microsoft.insights/components"
+          },
+          "resourceIdScopeList": {
+            "value": [
+              "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', parameters('metricAlertsArray')[copyIndex()].appInsightsResourceGroup, '/providers/microsoft.insights/components/', parameters('metricAlertsArray')[copyIndex()].appInsightsName)]"
+            ]
+          },
+          "metricNamepace": {
+            "value": "microsoft.insights/components"
+          },
+          "metricName": {
+            "value": "[parameters('metricAlertsArray')[copyIndex()].metricName]"
+          },
+          "metricOperator": {
+            "value": "[parameters('metricAlertsArray')[copyIndex()].metricOperator]"
+          },
+          "metricThreshold": {
+            "value": "[parameters('metricAlertsArray')[copyIndex()].metricThreshold]"
+          },
+          "timeAggregation": {
+            "value": "[parameters('metricAlertsArray')[copyIndex()].timeAggregation]"
+          },
+          "windowSize": {
+            "value": "[parameters('metricAlertsArray')[copyIndex()].windowSize]"
+          },
+          "evaluationFrequency": {
+            "value": "[parameters('metricAlertsArray')[copyIndex()].evaluationFrequency]"
+          },
+          "actionGroupResourceId": {
+            "value": "[parameters('actionGroupResourceId')]"
+          }
+        }
+      },
+      "copy": {
+        "name": "metricAlertsLoop",
+        "count": "[length(parameters('metricAlertsArray'))]",
+        "mode": "Parallel"
+      }
+    }
+  ],
+  "outputs": {}
+}
