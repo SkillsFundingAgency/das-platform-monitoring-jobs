@@ -8,7 +8,7 @@
         "description": "The array of metric alert objects."
       }
     },
-    "isMetricAlertEnabled": {
+    "areMetricAlertsEnabled": {
       "type": "bool",
       "metadata": {
         "description": "Specifies whether the alert is enabled."
@@ -47,7 +47,7 @@
             "value": 0
           },
           "isEnabled": {
-            "value": "[parameters('IsMetricAlertEnabled')]"
+            "value": "[parameters('areMetricAlertsEnabled')]"
           },
           "targetResourceType": {
             "value": "microsoft.insights/components"
