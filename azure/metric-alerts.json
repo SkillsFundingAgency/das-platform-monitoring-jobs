@@ -5,19 +5,7 @@
     "metricAlertsArray": {
       "type": "array",
       "metadata": {
-        "description": "The array of metric alert objects. E.g.
-        [
-            {
-                \"appInsightsResourceGroup\": \"das-pp-foo-rg\",
-                \"appInsightsName\": \"das-pp-foo-fa\",
-                \"metricName\": \"dependencies/failed\",
-                \"metricOperator\": \"GreaterThan\",
-                \"metricThreshold\": 0,
-                \"timeAggregation\": \"Count\",
-                \"windowSize\": \"P1D\",
-                \"evaluationFrequency\": \"PT1H\"
-            }
-        ]"
+        "description": "The array of metric alert objects."
       }
     },
     "isMetricAlertEnabled": {
