@@ -38,7 +38,7 @@
         },
         "parameters": {
           "alertName": {
-            "value": "[replace(concat(parameters('metricAlertsArray')[copyIndex()].appInsightsName, ' - ', parameters('metricAlertsArray')[copyIndex()].metricName, ' ', parameters('metricAlertsArray').metricOperator, ' ', parameters('metricAlertsArray').metricThreshold), '/', '-')]"
+            "value": "[replace(concat(parameters('metricAlertsArray')[copyIndex()].appInsightsName, ' - ', parameters('metricAlertsArray')[copyIndex()].metricName, ' ', parameters('metricAlertsArray')[copyIndex()].metricOperator, ' ', parameters('metricAlertsArray')[copyIndex()].metricThreshold), '/', '-')]"
           },
           "alertDescription": {
             "value": "[concat(parameters('metricAlertsArray')[copyIndex()].metricName, ' ', parameters('metricAlertsArray')[copyIndex()].metricOperator, ' ', parameters('metricAlertsArray')[copyIndex()].metricThreshold)]"
