@@ -295,6 +295,10 @@
                 {
                   "name": "FUNCTIONS_WORKER_RUNTIME",
                   "value": "powershell"
+                },
+                {
+                  "name": "WEBSITE_RUN_FROM_PACKAGE",
+                  "value": "1"
                 }
               ]
             }
@@ -407,6 +411,10 @@
                 {
                   "name": "AZURE_DEVOPS_METRIC_ENVIRONMENTS",
                   "value": "[parameters('azureDevOpsMetricEnvironments')]"
+                },
+                {
+                  "name": "WEBSITE_RUN_FROM_PACKAGE",
+                  "value": "1"
                 }
               ]
             }
