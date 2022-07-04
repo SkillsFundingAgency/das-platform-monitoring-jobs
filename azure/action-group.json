@@ -7,6 +7,10 @@
     },
     "serviceName": {
       "type": "string"
+    },
+    "utcValue": {
+      "type": "string",
+      "defaultValue": "[utcNow()]"
     }
   },
   "variables": {
@@ -22,7 +26,7 @@
   "resources": [
     {
       "apiVersion": "2021-04-01",
-      "name": "action-group",
+      "name": "[concat('action-group-', parameters('utcValue'))]",
       "type": "Microsoft.Resources/deployments",
       "properties": {
         "mode": "Incremental",
