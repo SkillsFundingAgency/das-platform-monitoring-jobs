@@ -310,8 +310,8 @@
         }
       },
       "dependsOn": [
-        "monitoring-function-app-insights",
-        "app-service-plan"
+        "[concat('monitoring-function-app-insights-', parameters('utcValue'))]",
+        "[concat('app-service-plan-', parameters('utcValue'))]"
       ]
     },
     {
@@ -426,8 +426,8 @@
         }
       },
       "dependsOn": [
-        "metrics-function-app-insights",
-        "app-service-plan"
+        "[concat('metrics-function-app-insights-', parameters('utcValue'))]",
+        "[concat('app-service-plan-', parameters('utcValue'))]"
       ]
     }
   ],
