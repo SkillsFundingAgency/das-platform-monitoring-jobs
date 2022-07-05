@@ -10,7 +10,7 @@
     },
     "utcValue": {
       "type": "string",
-      "defaultValue": "[utcNow('yyMMddHHmmss')]"
+      "defaultValue": "[utcNow('yyMMddHHmm')]"
     }
   },
   "variables": {
