@@ -7,6 +7,10 @@
     },
     "actionGroupResourceId": {
       "type": "string"
+    },
+    "utcValue": {
+      "type": "string",
+      "defaultValue": "[utcNow()]"
     }
   },
   "variables": {
@@ -15,7 +19,7 @@
   "resources": [
     {
       "apiVersion": "2020-06-01",
-      "name": "[concat('failure-anomalies-', parameters('appInsightsResourcesArray')[copyIndex()].appInsightsName)]",
+      "name": "[concat('failure-anomalies-', parameters('appInsightsResourcesArray')[copyIndex()].appInsightsName, '-', parameters('utcValue'))]",
       "resourceGroup": "[parameters('appInsightsResourcesArray')[copyIndex()].appInsightsResourceGroup]",
       "type": "Microsoft.Resources/deployments",
       "properties": {
