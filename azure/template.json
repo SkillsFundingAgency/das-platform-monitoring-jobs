@@ -76,6 +76,9 @@
     "subnetDelegations": {
       "type": "array"
     },
+    "workerAccessRestrictions": {
+      "type": "array"
+    },
     "aspSize": {
       "type": "string",
       "defaultValue": "1"
@@ -336,6 +339,9 @@
           },
           "subnetResourceId": {
             "value": "[reference(concat('asp-subnet-', parameters('utcValue'))).outputs.SubnetResourceId.value]"
+          },
+          "ipSecurityRestrictions": {
+            "value": "[parameters('workerAccessRestrictions')]"
           },
           "functionAppAppSettings": {
             "value": {
