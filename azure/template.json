@@ -224,6 +224,9 @@
           "subnetResourceId": {
             "value": "[reference(concat('asp-subnet-', parameters('utcValue'))).outputs.SubnetResourceId.value]"
           },
+          "ipSecurityRestrictions": {
+                        "value": "[parameters('workerAccessRestrictions')]"
+          },
           "functionAppAppSettings": {
             "value": {
               "array": [
