@@ -225,7 +225,15 @@
             "value": "[reference(concat('asp-subnet-', parameters('utcValue'))).outputs.SubnetResourceId.value]"
           },
           "ipSecurityRestrictions": {
-            "value": "[parameters('workerAccessRestrictions')]"
+            "value": [
+              {
+                "ipAddress": "ActionGroup",
+                "action": "Allow",
+                "tag": "ServiceTag",
+                "priority": 100,
+                "name": "ActionGroup"
+              }
+            ]
           },
           "functionAppAppSettings": {
             "value": {
