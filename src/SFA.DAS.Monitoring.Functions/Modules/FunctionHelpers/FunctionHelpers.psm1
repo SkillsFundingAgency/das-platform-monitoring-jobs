@@ -124,6 +124,11 @@ hashtable.  A hashtable representing the message to send to slack.
                 break
             }
 
+            "das-alerts-test" {
+                $SlackWebhookUri = $Configuration.Get("SLACK_WEBHOOK_URI_DAS_ALERTS_TEST")
+                break
+            }
+
             default {
                 $SlackWebhookUri = $Configuration.Get("SLACK_WEBHOOK_URI_DAS_ALERTS")
                 break
