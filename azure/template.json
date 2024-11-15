@@ -94,6 +94,12 @@
     "utcValue": {
       "type": "string",
       "defaultValue": "[utcNow()]"
+    },
+    "slackDefaultChannel":{
+      "type": "string"
+    },
+    "slackWebhookUriDasAlertsTest": {
+      "type": "string"
     }
   },
   "variables": {
@@ -284,7 +290,7 @@
                 },
                 {
                   "name": "SLACK_DEFAULT_CHANNEL",
-                  "value": "das-alerts"
+                  "value": "[parameters('slackDefaultChannel')]"
                 },
                 {
                   "name": "SLACK_ZENDESKDEV_CHANNEL",
@@ -301,6 +307,10 @@
                 {
                   "name": "SLACK_WEBHOOK_URI_DAS_ALERTS",
                   "value": "[parameters('slackWebhookUriDasAlerts')]"
+                },
+                {
+                  "name": "SLACK_WEBHOOK_URI_DAS_ALERTS_TEST",
+                  "value": "[parameters('slackWebhookUriDasAlertsTest')]"
                 },
                 {
                   "name": "SLACK_WEBHOOK_URI_ZENDESK_DEV",
