@@ -76,6 +76,9 @@
     "subnetDelegations": {
       "type": "array"
     },
+    "routeTable": {
+      "type": "object"
+    },
     "workerAccessRestrictions": {
       "type": "array"
     },
@@ -137,6 +140,9 @@
           },
           "delegations": {
             "value": "[parameters('subnetDelegations')]"
+          },
+          "routeTable": {
+            "value": "[parameters('routeTable')]"
           }
         }
       }
