@@ -1,477 +1,493 @@
 {
-  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-  "contentVersion": "1.0.0.0",
-  "parameters": {
-    "environmentName": {
-      "type": "string"
-    },
-    "resourceEnvironmentName": {
-      "type": "string"
-    },
-    "serviceName": {
-      "type": "string"
-    },
-    "loggingRedisConnectionString": {
-      "type": "securestring"
-    },
-    "configurationStorageConnectionString": {
-      "type": "securestring",
-      "defaultValue": ""
-    },
-    "sharedStorageAccountConnectionString": {
-      "type": "securestring"
-    },
-    "slackWebhookUriDasAlerts": {
-      "type": "securestring"
-    },
-    "slackWebhookUriZenDeskDev": {
-      "type": "securestring"
-    },
-    "slackWebhookUriZenDeskLive": {
-      "type": "securestring"
-    },
-    "logAnalyticsWorkspaceId": {
-      "type": "string"
-    },
-    "logAnalyticsWorkspaceKey": {
-      "type": "securestring"
-    },
-    "azureDevOpsOrganization": {
-      "type": "string"
-    },
-    "azureDevOpsProject": {
-      "type": "string"
-    },
-    "azureDevOpsAccessToken": {
-      "type": "securestring"
-    },
-    "azureDevOpsBuildQueryFromDays": {
-      "type": "int",
-      "defaultValue": 1
-    },
-    "azureDevOpsTestQueryFromDays": {
-      "type": "int",
-      "defaultValue": 30
-    },
-    "azureDevOpsMetricEnvironments": {
-      "type": "string",
-      "defaultValue": "PROD"
-    },
-    "functionsExtensionVersion": {
-      "type": "string",
-      "defaultValue": "~3"
-    },
-    "sharedEnvResourceGroup": {
-      "type": "string"
-    },
-    "sharedEnvVirtualNetworkName": {
-      "type": "string"
-    },
-    "subnetObject": {
-      "type": "object"
-    },
-    "subnetServiceEndpointList": {
-      "type": "array"
-    },
-    "subnetDelegations": {
-      "type": "array"
-    },
-    "routeTable": {
-      "type": "object"
-    },
-    "workerAccessRestrictions": {
-      "type": "array"
-    },
-    "aspSize": {
-      "type": "string",
-      "defaultValue": "1"
-    },
-    "aspInstances": {
-      "type": "int",
-      "defaultValue": 1
-    },
-    "aspTier": {
-      "type": "string",
-      "defaultValue": "Standard"
-    },
-    "utcValue": {
-      "type": "string",
-      "defaultValue": "[utcNow()]"
-    },
-    "slackDefaultChannel":{
-      "type": "string"
-    },
-    "slackWebhookUriDasAlertsTest": {
-      "type": "string"
-    }
-  },
-  "variables": {
-    "deploymentUrlBase": "https://raw.githubusercontent.com/SkillsFundingAgency/das-platform-building-blocks/master/templates/",
-    "resourceNamePrefix": "[toLower(concat('das-', parameters('resourceEnvironmentName'),'-', parameters('serviceName')))]",
-    "appServicePlanName": "[concat(variables('resourceNamePrefix'),'-asp')]",
-    "monitoringFunctionAppName": "[concat(variables('resourceNamePrefix'), 'mtr' ,'-fa')]",
-    "metricsFunctionAppName": "[concat(variables('resourceNamePrefix'), 'met','-fa')]"
-
-  },
-  "resources": [
-    {
-      "apiVersion": "2017-05-10",
-      "name": "[concat('asp-subnet-', parameters('utcValue'))]",
-      "resourceGroup": "[parameters('sharedEnvResourceGroup')]",
-      "type": "Microsoft.Resources/deployments",
-      "properties": {
-        "mode": "Incremental",
-        "templateLink": {
-          "uri": "[concat(variables('deploymentUrlBase'),'subnet.json')]",
-          "contentVersion": "1.0.0.0"
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "environmentName": {
+            "type": "string"
         },
-        "parameters": {
-          "virtualNetworkName": {
-            "value": "[parameters('sharedEnvVirtualNetworkName')]"
-          },
-          "subnetName": {
-            "value": "[parameters('subnetObject').name]"
-          },
-          "subnetAddressPrefix": {
-            "value": "[parameters('subnetObject').addressSpace]"
-          },
-          "serviceEndpointList": {
-            "value": "[parameters('subnetServiceEndpointList')]"
-          },
-          "delegations": {
-            "value": "[parameters('subnetDelegations')]"
-          },
-          "routeTable": {
-            "value": "[parameters('routeTable')]"
-          }
+        "resourceEnvironmentName": {
+            "type": "string"
+        },
+        "serviceName": {
+            "type": "string"
+        },
+        "loggingRedisConnectionString": {
+            "type": "securestring"
+        },
+        "configurationStorageConnectionString": {
+            "type": "securestring",
+            "defaultValue": ""
+        },
+        "sharedStorageAccountConnectionString": {
+            "type": "securestring"
+        },
+        "slackWebhookUriDasAlerts": {
+            "type": "securestring"
+        },
+        "slackWebhookUriZenDeskDev": {
+            "type": "securestring"
+        },
+        "slackWebhookUriZenDeskLive": {
+            "type": "securestring"
+        },
+        "logAnalyticsWorkspaceId": {
+            "type": "string"
+        },
+        "logAnalyticsWorkspaceKey": {
+            "type": "securestring"
+        },
+        "azureDevOpsOrganization": {
+            "type": "string"
+        },
+        "azureDevOpsProject": {
+            "type": "string"
+        },
+        "azureDevOpsAccessToken": {
+            "type": "securestring"
+        },
+        "azureDevOpsBuildQueryFromDays": {
+            "type": "int",
+            "defaultValue": 1
+        },
+        "azureDevOpsTestQueryFromDays": {
+            "type": "int",
+            "defaultValue": 30
+        },
+        "azureDevOpsMetricEnvironments": {
+            "type": "string",
+            "defaultValue": "PROD"
+        },
+        "functionsExtensionVersion": {
+            "type": "string",
+            "defaultValue": "~3"
+        },
+        "sharedEnvResourceGroup": {
+            "type": "string"
+        },
+        "sharedEnvVirtualNetworkName": {
+            "type": "string"
+        },
+        "subnetObject": {
+            "type": "object"
+        },
+        "subnetServiceEndpointList": {
+            "type": "array"
+        },
+        "subnetDelegations": {
+            "type": "array"
+        },
+        "routeTable": {
+            "type": "object"
+        },
+        "workerAccessRestrictions": {
+            "type": "array"
+        },
+        "aspSize": {
+            "type": "string",
+            "defaultValue": "1"
+        },
+        "aspInstances": {
+            "type": "int",
+            "defaultValue": 1
+        },
+        "aspTier": {
+            "type": "string",
+            "defaultValue": "Standard"
+        },
+        "utcValue": {
+            "type": "string",
+            "defaultValue": "[utcNow()]"
+        },
+        "slackDefaultChannel": {
+            "type": "string"
+        },
+        "slackWebhookUriDasAlertsTest": {
+            "type": "string"
+        },
+        "EnableRouteTableAssociation": {
+            "type": "bool",
+            "defaultValue": false,
+            "metadata": {
+                "description": "Determines whether to enable route table association on subnet"
+            }
+        },
+        "SharedRouteTableName": {
+            "type": "string",
+            "metadata": {
+                "description": "Determines whether to enable route table association on subnet"
+            }
         }
-      }
     },
-    {
-      "apiVersion": "2017-05-10",
-      "name": "[concat('app-service-plan-', parameters('utcValue'))]",
-      "type": "Microsoft.Resources/deployments",
-      "properties": {
-        "mode": "Incremental",
-        "templateLink": {
-          "uri": "[concat(variables('deploymentUrlBase'),'app-service-plan.json')]",
-          "contentVersion": "1.0.0.0"
+    "variables": {
+        "deploymentUrlBase": "https://raw.githubusercontent.com/SkillsFundingAgency/das-platform-building-blocks/master/templates/",
+        "resourceNamePrefix": "[toLower(concat('das-', parameters('resourceEnvironmentName'),'-', parameters('serviceName')))]",
+        "appServicePlanName": "[concat(variables('resourceNamePrefix'),'-asp')]",
+        "monitoringFunctionAppName": "[concat(variables('resourceNamePrefix'), 'mtr' ,'-fa')]",
+        "metricsFunctionAppName": "[concat(variables('resourceNamePrefix'), 'met','-fa')]",
+        "routeTableId": {
+            "id": "[resourceId(subscription().subscriptionId, parameters('sharedEnvResourceGroup'), 'Microsoft.Network/routeTables', parameters('SharedRouteTableName'))]"
         },
-        "parameters": {
-          "appServicePlanName": {
-            "value": "[variables('appServicePlanName')]"
-          },
-          "aspSize": {
-            "value": "[parameters('aspSize')]"
-          },
-          "aspInstances": {
-            "value": "[parameters('aspInstances')]"
-          },
-          "nonASETier": {
-            "value": "[parameters('aspTier')]"
-          }
-        }
-      }
+        "emptyObject": {}
     },
-    {
-      "apiVersion": "2017-05-10",
-      "name": "[concat('metrics-function-app-insights-', parameters('utcValue'))]",
-      "type": "Microsoft.Resources/deployments",
-      "properties": {
-        "mode": "Incremental",
-        "templateLink": {
-          "uri": "[concat(variables('deploymentUrlBase'),'application-insights.json')]",
-          "contentVersion": "1.0.0.0"
+    "resources": [
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[concat('asp-subnet-', parameters('utcValue'))]",
+            "resourceGroup": "[parameters('sharedEnvResourceGroup')]",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(variables('deploymentUrlBase'),'subnet.json')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "virtualNetworkName": {
+                        "value": "[parameters('sharedEnvVirtualNetworkName')]"
+                    },
+                    "subnetName": {
+                        "value": "[parameters('subnetObject').name]"
+                    },
+                    "subnetAddressPrefix": {
+                        "value": "[parameters('subnetObject').addressSpace]"
+                    },
+                    "serviceEndpointList": {
+                        "value": "[parameters('subnetServiceEndpointList')]"
+                    },
+                    "delegations": {
+                        "value": "[parameters('subnetDelegations')]"
+                    },
+                    "routeTable": {
+                        "value": "[parameters('routeTable')]"
+                    }
+                }
+            }
         },
-        "parameters": {
-          "appInsightsName": {
-            "value": "[variables('metricsFunctionAppName')]"
-          },
-          "attachedService": {
-            "value": "[variables('metricsFunctionAppName')]"
-          }
-        }
-      }
-    },
-    {
-      "apiVersion": "2017-05-10",
-      "name": "[concat('monitoring-function-app-insights-', parameters('utcValue'))]",
-      "type": "Microsoft.Resources/deployments",
-      "properties": {
-        "mode": "Incremental",
-        "templateLink": {
-          "uri": "[concat(variables('deploymentUrlBase'),'application-insights.json')]",
-          "contentVersion": "1.0.0.0"
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[concat('app-service-plan-', parameters('utcValue'))]",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(variables('deploymentUrlBase'),'app-service-plan.json')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "appServicePlanName": {
+                        "value": "[variables('appServicePlanName')]"
+                    },
+                    "aspSize": {
+                        "value": "[parameters('aspSize')]"
+                    },
+                    "aspInstances": {
+                        "value": "[parameters('aspInstances')]"
+                    },
+                    "nonASETier": {
+                        "value": "[parameters('aspTier')]"
+                    }
+                }
+            }
         },
-        "parameters": {
-          "appInsightsName": {
-            "value": "[variables('monitoringFunctionAppName')]"
-          },
-          "attachedService": {
-            "value": "[variables('monitoringFunctionAppName')]"
-          }
-        }
-      }
-    },
-    {
-      "apiVersion": "2017-05-10",
-      "name": "[concat('monitoring-function-app-', parameters('utcValue'))]",
-      "type": "Microsoft.Resources/deployments",
-      "properties": {
-        "mode": "Incremental",
-        "templateLink": {
-          "uri": "[concat(variables('deploymentUrlBase'),'function-app-v2.json')]",
-          "contentVersion": "1.0.0.0"
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[concat('metrics-function-app-insights-', parameters('utcValue'))]",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(variables('deploymentUrlBase'),'application-insights.json')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "appInsightsName": {
+                        "value": "[variables('metricsFunctionAppName')]"
+                    },
+                    "attachedService": {
+                        "value": "[variables('metricsFunctionAppName')]"
+                    }
+                }
+            }
         },
-        "parameters": {
-          "functionAppName": {
-            "value": "[variables('monitoringFunctionAppName')]"
-          },
-          "appServicePlanName": {
-            "value": "[variables('appServicePlanName')]"
-          },
-          "appServicePlanResourceGroup": {
-            "value": "[resourceGroup().name]"
-          },
-          "subnetResourceId": {
-            "value": "[reference(concat('asp-subnet-', parameters('utcValue'))).outputs.SubnetResourceId.value]"
-          },
-          "ipSecurityRestrictions": {
-            "value": [
-              {
-                "ipAddress": "ActionGroup",
-                "action": "Allow",
-                "tag": "ServiceTag",
-                "priority": 100,
-                "name": "ActionGroup"
-              }
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[concat('monitoring-function-app-insights-', parameters('utcValue'))]",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(variables('deploymentUrlBase'),'application-insights.json')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "appInsightsName": {
+                        "value": "[variables('monitoringFunctionAppName')]"
+                    },
+                    "attachedService": {
+                        "value": "[variables('monitoringFunctionAppName')]"
+                    }
+                }
+            }
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[concat('monitoring-function-app-', parameters('utcValue'))]",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(variables('deploymentUrlBase'),'function-app-v2.json')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "functionAppName": {
+                        "value": "[variables('monitoringFunctionAppName')]"
+                    },
+                    "appServicePlanName": {
+                        "value": "[variables('appServicePlanName')]"
+                    },
+                    "appServicePlanResourceGroup": {
+                        "value": "[resourceGroup().name]"
+                    },
+                    "subnetResourceId": {
+                        "value": "[reference(concat('asp-subnet-', parameters('utcValue'))).outputs.SubnetResourceId.value]"
+                    },
+                    "ipSecurityRestrictions": {
+                        "value": [
+                            {
+                                "ipAddress": "ActionGroup",
+                                "action": "Allow",
+                                "tag": "ServiceTag",
+                                "priority": 100,
+                                "name": "ActionGroup"
+                            }
+                        ]
+                    },
+                    "functionAppAppSettings": {
+                        "value": {
+                            "array": [
+                                {
+                                    "name": "PSWorkerInProcConcurrencyUpperBound",
+                                    "value": 5
+                                },
+                                {
+                                    "name": "AzureWebJobsStorage",
+                                    "value": "[parameters('sharedStorageAccountConnectionString')]"
+                                },
+                                {
+                                    "name": "AzureWebJobsSecretStorageType",
+                                    "value": "Files"
+                                },
+                                {
+                                    "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+                                    "value": "[reference(concat('monitoring-function-app-insights-', parameters('utcValue'))).outputs.InstrumentationKey.value]"
+                                },
+                                {
+                                    "name": "FUNCTIONS_EXTENSION_VERSION",
+                                    "value": "[parameters('functionsExtensionVersion')]"
+                                },
+                                {
+                                    "name": "FUNCTIONS_WORKER_RUNTIME_VERSION",
+                                    "value": "~7"
+                                },
+                                {
+                                    "name": "EnvironmentName",
+                                    "value": "[toUpper(parameters('environmentName'))]"
+                                },
+                                {
+                                    "name": "LoggingRedisConnectionString",
+                                    "value": "[parameters('loggingRedisConnectionString')]"
+                                },
+                                {
+                                    "name": "ConfigurationStorageConnectionString",
+                                    "value": "[parameters('configurationStorageConnectionString')]"
+                                },
+                                {
+                                    "name": "AppName",
+                                    "value": "das-platform-monitoring-jobs"
+                                },
+                                {
+                                    "name": "SLACK_USERNAME",
+                                    "value": "AzureAlerts"
+                                },
+                                {
+                                    "name": "SLACK_DEFAULT_CHANNEL",
+                                    "value": "[parameters('slackDefaultChannel')]"
+                                },
+                                {
+                                    "name": "SLACK_ZENDESKDEV_CHANNEL",
+                                    "value": "zendesk-dev"
+                                },
+                                {
+                                    "name": "SLACK_ZENDESKLIVE_CHANNEL",
+                                    "value": "zendesk-live"
+                                },
+                                {
+                                    "name": "SLACK_ICON_EMOJI",
+                                    "value": ":mega:"
+                                },
+                                {
+                                    "name": "SLACK_WEBHOOK_URI_DAS_ALERTS",
+                                    "value": "[parameters('slackWebhookUriDasAlerts')]"
+                                },
+                                {
+                                    "name": "SLACK_WEBHOOK_URI_DAS_ALERTS_TEST",
+                                    "value": "[parameters('slackWebhookUriDasAlertsTest')]"
+                                },
+                                {
+                                    "name": "SLACK_WEBHOOK_URI_ZENDESK_DEV",
+                                    "value": "[parameters('slackWebhookUriZenDeskDev')]"
+                                },
+                                {
+                                    "name": "SLACK_WEBHOOK_URI_ZENDESK_LIVE",
+                                    "value": "[parameters('slackWebhookUriZenDeskLive')]"
+                                },
+                                {
+                                    "name": "FUNCTIONS_WORKER_RUNTIME",
+                                    "value": "powershell"
+                                },
+                                {
+                                    "name": "WEBSITE_RUN_FROM_PACKAGE",
+                                    "value": "1"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "dependsOn": [
+                "[concat('monitoring-function-app-insights-', parameters('utcValue'))]",
+                "[concat('app-service-plan-', parameters('utcValue'))]"
             ]
-          },
-          "functionAppAppSettings": {
-            "value": {
-              "array": [
-                {
-                  "name": "PSWorkerInProcConcurrencyUpperBound",
-                  "value": 5
-                },
-                {
-                  "name": "AzureWebJobsStorage",
-                  "value": "[parameters('sharedStorageAccountConnectionString')]"
-                },
-                {
-                  "name": "AzureWebJobsSecretStorageType",
-                  "value": "Files"
-                },
-                {
-                  "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
-                  "value": "[reference(concat('monitoring-function-app-insights-', parameters('utcValue'))).outputs.InstrumentationKey.value]"
-                },
-                {
-                  "name": "FUNCTIONS_EXTENSION_VERSION",
-                  "value": "[parameters('functionsExtensionVersion')]"
-                },
-                {
-                  "name": "FUNCTIONS_WORKER_RUNTIME_VERSION",
-                  "value": "~7"
-                },
-                {
-                  "name": "EnvironmentName",
-                  "value": "[toUpper(parameters('environmentName'))]"
-                },
-                {
-                  "name": "LoggingRedisConnectionString",
-                  "value": "[parameters('loggingRedisConnectionString')]"
-                },
-                {
-                  "name": "ConfigurationStorageConnectionString",
-                  "value": "[parameters('configurationStorageConnectionString')]"
-                },
-                {
-                  "name": "AppName",
-                  "value": "das-platform-monitoring-jobs"
-                },
-                {
-                  "name": "SLACK_USERNAME",
-                  "value": "AzureAlerts"
-                },
-                {
-                  "name": "SLACK_DEFAULT_CHANNEL",
-                  "value": "[parameters('slackDefaultChannel')]"
-                },
-                {
-                  "name": "SLACK_ZENDESKDEV_CHANNEL",
-                  "value": "zendesk-dev"
-                },
-                {
-                  "name": "SLACK_ZENDESKLIVE_CHANNEL",
-                  "value": "zendesk-live"
-                },
-                {
-                  "name": "SLACK_ICON_EMOJI",
-                  "value": ":mega:"
-                },
-                {
-                  "name": "SLACK_WEBHOOK_URI_DAS_ALERTS",
-                  "value": "[parameters('slackWebhookUriDasAlerts')]"
-                },
-                {
-                  "name": "SLACK_WEBHOOK_URI_DAS_ALERTS_TEST",
-                  "value": "[parameters('slackWebhookUriDasAlertsTest')]"
-                },
-                {
-                  "name": "SLACK_WEBHOOK_URI_ZENDESK_DEV",
-                  "value": "[parameters('slackWebhookUriZenDeskDev')]"
-                },
-                {
-                  "name": "SLACK_WEBHOOK_URI_ZENDESK_LIVE",
-                  "value": "[parameters('slackWebhookUriZenDeskLive')]"
-                },
-                {
-                  "name": "FUNCTIONS_WORKER_RUNTIME",
-                  "value": "powershell"
-                },
-                {
-                  "name": "WEBSITE_RUN_FROM_PACKAGE",
-                  "value": "1"
-                }
-              ]
-            }
-          }
-        }
-      },
-      "dependsOn": [
-        "[concat('monitoring-function-app-insights-', parameters('utcValue'))]",
-        "[concat('app-service-plan-', parameters('utcValue'))]"
-      ]
-    },
-    {
-      "apiVersion": "2017-05-10",
-      "name": "[concat('metrics-function-app-', parameters('utcValue'))]",
-      "type": "Microsoft.Resources/deployments",
-      "properties": {
-        "mode": "Incremental",
-        "templateLink": {
-          "uri": "[concat(variables('deploymentUrlBase'),'function-app-v2.json')]",
-          "contentVersion": "1.0.0.0"
         },
-        "parameters": {
-          "functionAppName": {
-            "value": "[variables('metricsFunctionAppName')]"
-          },
-          "appServicePlanName": {
-            "value": "[variables('appServicePlanName')]"
-          },
-          "appServicePlanResourceGroup": {
-            "value": "[resourceGroup().name]"
-          },
-          "subnetResourceId": {
-            "value": "[reference(concat('asp-subnet-', parameters('utcValue'))).outputs.SubnetResourceId.value]"
-          },
-          "ipSecurityRestrictions": {
-            "value": "[parameters('workerAccessRestrictions')]"
-          },
-          "functionAppAppSettings": {
-            "value": {
-              "array": [
-                {
-                  "name": "PSWorkerInProcConcurrencyUpperBound",
-                  "value": 5
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[concat('metrics-function-app-', parameters('utcValue'))]",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(variables('deploymentUrlBase'),'function-app-v2.json')]",
+                    "contentVersion": "1.0.0.0"
                 },
-                {
-                  "name": "AzureWebJobsStorage",
-                  "value": "[parameters('sharedStorageAccountConnectionString')]"
-                },
-                {
-                  "name": "AzureWebJobsSecretStorageType",
-                  "value": "Files"
-                },
-                {
-                  "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
-                  "value": "[reference(concat('metrics-function-app-insights-', parameters('utcValue'))).outputs.InstrumentationKey.value]"
-                },
-                {
-                  "name": "FUNCTIONS_EXTENSION_VERSION",
-                  "value": "[parameters('functionsExtensionVersion')]"
-                },
-                {
-                  "name": "FUNCTIONS_WORKER_RUNTIME_VERSION",
-                  "value": "~7"
-                },
-                {
-                  "name": "EnvironmentName",
-                  "value": "[toUpper(parameters('environmentName'))]"
-                },
-                {
-                  "name": "LoggingRedisConnectionString",
-                  "value": "[parameters('loggingRedisConnectionString')]"
-                },
-                {
-                  "name": "ConfigurationStorageConnectionString",
-                  "value": "[parameters('configurationStorageConnectionString')]"
-                },
-                {
-                  "name": "AppName",
-                  "value": "das-platform-metrics-jobs"
-                },
-                {
-                  "name": "FUNCTIONS_WORKER_RUNTIME",
-                  "value": "powershell"
-                },
-                {
-                  "name": "LOG_ANALYTICS_WORKSPACE_ID",
-                  "value": "[parameters('logAnalyticsWorkspaceId')]"
-                },
-                {
-                  "name": "LOG_ANALYTICS_WORKSPACE_KEY",
-                  "value": "[parameters('logAnalyticsWorkspaceKey')]"
-                },
-                {
-                  "name": "AZURE_DEVOPS_ORGANIZATION",
-                  "value": "[parameters('azureDevOpsOrganization')]"
-                },
-                {
-                  "name": "AZURE_DEVOPS_PROJECT",
-                  "value": "[parameters('azureDevOpsProject')]"
-                },
-                {
-                  "name": "AZURE_DEVOPS_ACCESS_TOKEN",
-                  "value": "[parameters('azureDevOpsAccessToken')]"
-                },
-                {
-                  "name": "AZURE_DEVOPS_BUILD_QUERYFROMDAYS",
-                  "value": "[parameters('azureDevOpsBuildQueryFromDays')]"
-                },
-                {
-                  "name": "AZURE_DEVOPS_TEST_QUERYFROMDAYS",
-                  "value": "[parameters('azureDevOpsTestQueryFromDays')]"
-                },
-                {
-                  "name": "AZURE_DEVOPS_METRIC_ENVIRONMENTS",
-                  "value": "[parameters('azureDevOpsMetricEnvironments')]"
-                },
-                {
-                  "name": "WEBSITE_RUN_FROM_PACKAGE",
-                  "value": "1"
+                "parameters": {
+                    "functionAppName": {
+                        "value": "[variables('metricsFunctionAppName')]"
+                    },
+                    "appServicePlanName": {
+                        "value": "[variables('appServicePlanName')]"
+                    },
+                    "appServicePlanResourceGroup": {
+                        "value": "[resourceGroup().name]"
+                    },
+                    "subnetResourceId": {
+                        "value": "[reference(concat('asp-subnet-', parameters('utcValue'))).outputs.SubnetResourceId.value]"
+                    },
+                    "ipSecurityRestrictions": {
+                        "value": "[parameters('workerAccessRestrictions')]"
+                    },
+                    "functionAppAppSettings": {
+                        "value": {
+                            "array": [
+                                {
+                                    "name": "PSWorkerInProcConcurrencyUpperBound",
+                                    "value": 5
+                                },
+                                {
+                                    "name": "AzureWebJobsStorage",
+                                    "value": "[parameters('sharedStorageAccountConnectionString')]"
+                                },
+                                {
+                                    "name": "AzureWebJobsSecretStorageType",
+                                    "value": "Files"
+                                },
+                                {
+                                    "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+                                    "value": "[reference(concat('metrics-function-app-insights-', parameters('utcValue'))).outputs.InstrumentationKey.value]"
+                                },
+                                {
+                                    "name": "FUNCTIONS_EXTENSION_VERSION",
+                                    "value": "[parameters('functionsExtensionVersion')]"
+                                },
+                                {
+                                    "name": "FUNCTIONS_WORKER_RUNTIME_VERSION",
+                                    "value": "~7"
+                                },
+                                {
+                                    "name": "EnvironmentName",
+                                    "value": "[toUpper(parameters('environmentName'))]"
+                                },
+                                {
+                                    "name": "LoggingRedisConnectionString",
+                                    "value": "[parameters('loggingRedisConnectionString')]"
+                                },
+                                {
+                                    "name": "ConfigurationStorageConnectionString",
+                                    "value": "[parameters('configurationStorageConnectionString')]"
+                                },
+                                {
+                                    "name": "AppName",
+                                    "value": "das-platform-metrics-jobs"
+                                },
+                                {
+                                    "name": "FUNCTIONS_WORKER_RUNTIME",
+                                    "value": "powershell"
+                                },
+                                {
+                                    "name": "LOG_ANALYTICS_WORKSPACE_ID",
+                                    "value": "[parameters('logAnalyticsWorkspaceId')]"
+                                },
+                                {
+                                    "name": "LOG_ANALYTICS_WORKSPACE_KEY",
+                                    "value": "[parameters('logAnalyticsWorkspaceKey')]"
+                                },
+                                {
+                                    "name": "AZURE_DEVOPS_ORGANIZATION",
+                                    "value": "[parameters('azureDevOpsOrganization')]"
+                                },
+                                {
+                                    "name": "AZURE_DEVOPS_PROJECT",
+                                    "value": "[parameters('azureDevOpsProject')]"
+                                },
+                                {
+                                    "name": "AZURE_DEVOPS_ACCESS_TOKEN",
+                                    "value": "[parameters('azureDevOpsAccessToken')]"
+                                },
+                                {
+                                    "name": "AZURE_DEVOPS_BUILD_QUERYFROMDAYS",
+                                    "value": "[parameters('azureDevOpsBuildQueryFromDays')]"
+                                },
+                                {
+                                    "name": "AZURE_DEVOPS_TEST_QUERYFROMDAYS",
+                                    "value": "[parameters('azureDevOpsTestQueryFromDays')]"
+                                },
+                                {
+                                    "name": "AZURE_DEVOPS_METRIC_ENVIRONMENTS",
+                                    "value": "[parameters('azureDevOpsMetricEnvironments')]"
+                                },
+                                {
+                                    "name": "WEBSITE_RUN_FROM_PACKAGE",
+                                    "value": "1"
+                                }
+                            ]
+                        }
+                    }
                 }
-              ]
-            }
-          }
+            },
+            "dependsOn": [
+                "[concat('metrics-function-app-insights-', parameters('utcValue'))]",
+                "[concat('app-service-plan-', parameters('utcValue'))]"
+            ]
         }
-      },
-      "dependsOn": [
-        "[concat('metrics-function-app-insights-', parameters('utcValue'))]",
-        "[concat('app-service-plan-', parameters('utcValue'))]"
-      ]
+    ],
+    "outputs": {
+        "MonitoringFunctionAppName": {
+            "type": "string",
+            "value": "[variables('monitoringFunctionAppName')]"
+        },
+        "MetricsFunctionAppName": {
+            "type": "string",
+            "value": "[variables('metricsFunctionAppName')]"
+        }
     }
-  ],
-  "outputs": {
-    "MonitoringFunctionAppName": {
-      "type": "string",
-      "value": "[variables('monitoringFunctionAppName')]"
-    },
-    "MetricsFunctionAppName": {
-      "type": "string",
-      "value": "[variables('metricsFunctionAppName')]"
-    }
-  }
 }
