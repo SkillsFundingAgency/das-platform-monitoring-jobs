@@ -103,6 +103,9 @@
     },
     "slackWebhookUriDasAlertsTest": {
       "type": "string"
+    },
+    "deployPrivateLinkedScopedResource": {
+      "type": "bool"
     }
   },
   "variables": {
@@ -110,7 +113,8 @@
     "resourceNamePrefix": "[toLower(concat('das-', parameters('resourceEnvironmentName'),'-', parameters('serviceName')))]",
     "appServicePlanName": "[concat(variables('resourceNamePrefix'),'-asp')]",
     "monitoringFunctionAppName": "[concat(variables('resourceNamePrefix'), 'mtr' ,'-fa')]",
-    "metricsFunctionAppName": "[concat(variables('resourceNamePrefix'), 'met','-fa')]"
+    "metricsFunctionAppName": "[concat(variables('resourceNamePrefix'), 'met','-fa')]",
+    "privateLinkScopeName": "[toLower(concat('das-', parameters('resourceEnvironmentName'),'-shared-ampls'))]"
 
   },
   "resources": [
@@ -194,6 +198,31 @@
       }
     },
     {
+      "condition": "[parameters('deployPrivateLinkedScopedResource')]",
+      "apiVersion": "2021-04-01",
+      "name": "[concat(variables('metricsFunctionAppName'), '-private-link-scoped-', parameters('utcValue'))]",
+      "type": "Microsoft.Resources/deployments",
+      "resourceGroup": "[parameters('sharedEnvResourceGroup')]",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(variables('deploymentUrlBase'),'private-linked-scoped-resource.json')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "privateLinkScopeName": {
+            "value": "[variables('privateLinkScopeName')]"
+          },
+          "scopedResourceName": {
+            "value": "[variables('metricsFunctionAppName')]"
+          },
+          "scopedResourceId": {
+            "value": "[reference(concat('metrics-function-app-insights-', parameters('utcValue'))).outputs.AppInsightsResourceId.value]"
+          }
+        }
+      }
+    },
+    {
       "apiVersion": "2017-05-10",
       "name": "[concat('monitoring-function-app-insights-', parameters('utcValue'))]",
       "type": "Microsoft.Resources/deployments",
@@ -209,6 +238,31 @@
           },
           "attachedService": {
             "value": "[variables('monitoringFunctionAppName')]"
+          }
+        }
+      }
+    },
+    {
+      "condition": "[parameters('deployPrivateLinkedScopedResource')]",
+      "apiVersion": "2021-04-01",
+      "name": "[concat(variables('monitoringFunctionAppName'), '-private-link-scoped-', parameters('utcValue'))]",
+      "type": "Microsoft.Resources/deployments",
+      "resourceGroup": "[parameters('sharedEnvResourceGroup')]",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(variables('deploymentUrlBase'),'private-linked-scoped-resource.json')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "privateLinkScopeName": {
+            "value": "[variables('privateLinkScopeName')]"
+          },
+          "scopedResourceName": {
+            "value": "[variables('monitoringFunctionAppName')]"
+          },
+          "scopedResourceId": {
+            "value": "[reference(concat('monitoring-function-app-insights-', parameters('utcValue'))).outputs.AppInsightsResourceId.value]"
           }
         }
       }
