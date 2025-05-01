@@ -8,6 +8,9 @@
     "resourceEnvironmentName": {
       "type": "string"
     },
+    "amplsEnvironmentName": {
+      "type": "string"
+    },
     "serviceName": {
       "type": "string"
     },
@@ -114,7 +117,7 @@
     "appServicePlanName": "[concat(variables('resourceNamePrefix'),'-asp')]",
     "monitoringFunctionAppName": "[concat(variables('resourceNamePrefix'), 'mtr' ,'-fa')]",
     "metricsFunctionAppName": "[concat(variables('resourceNamePrefix'), 'met','-fa')]",
-    "privateLinkScopeName": "[toLower(concat('das-', parameters('resourceEnvironmentName'),'-shared-ampls'))]"
+    "privateLinkScopeName": "[toLower(concat('das-', parameters('amplsEnvironmentName'),'-shared-ampls'))]"
 
   },
   "resources": [
