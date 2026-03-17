@@ -5,8 +5,6 @@ trigger:
       - "master"
 
 variables:
-- name: SolutionBaseName
-  value: __SolutionBaseName__ #PLACEHOLDER
 - name: BuildPlatform
   value: any cpu
 - group: RELEASE Management Resources

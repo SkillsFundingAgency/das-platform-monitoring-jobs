@@ -55,10 +55,10 @@ jobs:
             TemplateSecrets: {}
         - ${{ if eq(parameters.Environment, 'PROD') }}:
           - task: AzurePowerShell@5
-            displayName: 'Get Application Insights Resources'
+            displayName: Get Application Insights Resources
             inputs:
               azureSubscription: ${{ parameters.ServiceConnection }}
-              ScriptPath: '$(System.DefaultWorkingDirectory)/das-platform-monitoring-jobs/drop/tools/Get-AppInsightsResources.ps1'
+              ScriptPath: $(Pipeline.Workspace)/drop/tools/Get-AppInsightsResources.ps1
               ScriptArguments: '-AppInsightsNamePrefix $(AppInsightsNamePrefix)'
               azurePowerShellVersion: LatestVersion
               pwsh: true
@@ -70,7 +70,7 @@ jobs:
               foreach( $obj in $AppInsightsResourcesArray){
                   Write-Host ("AppInsightsResourceGroup:{0} AppInsightsName:{1}" -f $obj.AppInsightsResourceGroup, $obj.AppInsightsName)
               } 
-            displayName: 'Output Application Insights Resources'
+            displayName: Output Application Insights Resources
           - template: azure-pipelines-templates/deploy/step/arm-deploy.yml@das-platform-building-blocks
             parameters:
               ServiceConnection: ${{ parameters.ServiceConnection }}
