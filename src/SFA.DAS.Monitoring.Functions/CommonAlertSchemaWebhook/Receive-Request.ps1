@@ -7,11 +7,103 @@ function Sanitize-Ascii {
     return ($Text -replace '[^\u0009\u000A\u000D\u0020-\u007E]', ' ')
 }
 
+function Get-MessageMetadata {
+    Param (
+        [String]$MonitorCondition
+        [String]$AlertRule
+    )
+
+    $ConditionMetadata = @{
+        AttachmentColour = $null
+        TitleEmoji       = $null
+    }
+
+    switch -Wildcard ($AlertRule) {
+        '*504 Gateway Time-out*' {
+            $ConditionMetadata.TitleEmoji = ":hourglassdone:"
+            break
+        }
+
+        '*application gateway failed requests*' {
+            $ConditionMetadata.TitleEmoji = ":noentrysign:"
+            break
+        }
+
+        '*Azure SQL*' {
+            $ConditionMetadata.TitleEmoji = ":filebox:"
+            break
+        }
+
+        '*Expiring App Registration Secrets*' {
+            $ConditionMetadata.TitleEmoji = ":soonarrow:"
+            break
+        }
+
+        '*Failed Requests Alert*' {
+            $ConditionMetadata.TitleEmoji = ":policecarsrevolvinglight:"
+            break
+        }
+
+        '*Response Time Alert*' {
+            $ConditionMetadata.TitleEmoji = ":stopwatch:"
+            break
+        }
+
+        default {
+            $ConditionMetadata.TitleEmoji = ":question:"
+            break
+        }
+
+    }
+
+    switch ($MonitorCondition) {
+        'Fired' {
+            $ConditionMetadata.AttachmentColour = "attention"
+            break
+        }
+
+        'Resolved' {
+            $ConditionMetadata.AttachmentColour = "good"
+            $ConditionMetadata.TitleEmoji = ":heavy_check_mark:"
+            break
+        }
+
+        default {
+            $ConditionMetadata.AttachmentColour = "attention"
+            break
+        }
+    }
+
+    Write-Output $ConditionMetadata
+}
+
+function Format-Title {
+    Param (
+        [String]$AlertRule
+        [String]$MonitorCondition
+    )
+    
+    $MessageMetadata = Get-MessageMetadata -MonitorCondition $MonitorCondition -AlertRule $AlertRule
+    
+    $title = Sanitize-Ascii([string]($AlertRule ?? 'Alert'))
+    if ([string]::IsNullOrWhiteSpace($title)) { $title = 'Alert' }
+
+    $Formatting = @{
+        FormattedTitle = $null
+        Colour         = $null
+    }
+    $Formatting.FormattedTitle = "$($MessageMetadata.TitleEmoji) $($AlertData.essentials.alertRule)"
+    $Formatting.Colour = $MessageMetadata.AttachmentColour
+
+    Write-Output $Formatting
+}
+
 function Build-AdaptiveCard-Min {
     param([hashtable]$Ess)
 
-    $title = Sanitize-Ascii([string]($Ess.alertRule ?? 'Alert'))
-    if ([string]::IsNullOrWhiteSpace($title)) { $title = 'Alert' }
+    $formatting = Format-Title -AlertRule [string]$Ess.alertRule -MonitorCondition [string]$Ess.monitorCondition
+    $title = $formatting.FormattedTitle
+    $colour = $formatting.Colour
 
     $sev   = Sanitize-Ascii([string]$Ess.severity)
     $cond  = Sanitize-Ascii([string]$Ess.monitorCondition)
@@ -35,18 +127,24 @@ function Build-AdaptiveCard-Min {
     if ($sev)  { $facts += @{ title='Severity:'; value= $sev } }
     if ($cond) { $facts += @{ title='State:';    value= $cond } }
 
-    $body = @(
+    $items = @(
         @{ type='TextBlock'; text=$title; weight='Bolder'; size='Medium'; wrap=$true },
         @{ type='TextBlock'; text=("Severity: {0} | Condition: {1}" -f $sev,$cond); isSubtle=$true; wrap=$true }
     )
 
     if (-not [string]::IsNullOrWhiteSpace($desc)) {
-        $body += @{ type='TextBlock'; text=$desc; wrap=$true }
+        $items += @{ type='TextBlock'; text=$desc; wrap=$true }
     }
 
     if ($facts.Count -gt 0) {
-        $body += @{ type='FactSet'; facts=$facts }
+        $items += @{ type='FactSet'; facts=$facts }
     }
+
+    $body = @(
+        type = 'Container'
+        style = $formatting.Colour
+        items = $items
+    )
 
     return @{
         '$schema' = 'http://adaptivecards.io/schemas/adaptive-card.json'
