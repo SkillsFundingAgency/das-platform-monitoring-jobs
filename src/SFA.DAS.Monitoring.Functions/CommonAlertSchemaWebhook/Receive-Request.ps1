@@ -150,7 +150,7 @@ function Build-AdaptiveCard-Min {
         '$schema' = 'http://adaptivecards.io/schemas/adaptive-card.json'
         type      = 'AdaptiveCard'
         version   = '1.4'
-        body      = $body
+        body      = @($body)
     }
 }
 
