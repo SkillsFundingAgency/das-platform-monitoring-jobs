@@ -173,6 +173,7 @@
     {
       "apiVersion": "2021-04-01",
       "name": "[concat('app-service-plan-', parameters('utcValue'))]",
+      "resourceGroup": "[variables('resourceGroupName')]",
       "type": "Microsoft.Resources/deployments",
       "properties": {
         "mode": "Incremental",
@@ -199,6 +200,7 @@
     {
       "apiVersion": "2021-04-01",
       "name": "[concat('metrics-function-app-insights-', parameters('utcValue'))]",
+      "resourceGroup": "[variables('resourceGroupName')]",
       "type": "Microsoft.Resources/deployments",
       "properties": {
         "mode": "Incremental",
@@ -220,8 +222,8 @@
       "condition": "[parameters('deployPrivateLinkedScopedResource')]",
       "apiVersion": "2021-04-01",
       "name": "[concat(variables('metricsFunctionAppName'), '-private-link-scoped-', parameters('utcValue'))]",
-      "type": "Microsoft.Resources/deployments",
       "resourceGroup": "[parameters('sharedEnvResourceGroup')]",
+      "type": "Microsoft.Resources/deployments",
       "properties": {
         "mode": "Incremental",
         "templateLink": {
@@ -244,6 +246,7 @@
     {
       "apiVersion": "2021-04-01",
       "name": "[concat('monitoring-function-app-insights-', parameters('utcValue'))]",
+      "resourceGroup": "[variables('resourceGroupName')]",
       "type": "Microsoft.Resources/deployments",
       "properties": {
         "mode": "Incremental",
@@ -265,8 +268,8 @@
       "condition": "[parameters('deployPrivateLinkedScopedResource')]",
       "apiVersion": "2021-04-01",
       "name": "[concat(variables('monitoringFunctionAppName'), '-private-link-scoped-', parameters('utcValue'))]",
-      "type": "Microsoft.Resources/deployments",
       "resourceGroup": "[parameters('sharedEnvResourceGroup')]",
+      "type": "Microsoft.Resources/deployments",
       "properties": {
         "mode": "Incremental",
         "templateLink": {
@@ -289,6 +292,7 @@
     {
       "apiVersion": "2021-04-01",
       "name": "[concat('monitoring-function-app-', parameters('utcValue'))]",
+      "resourceGroup": "[variables('resourceGroupName')]",
       "type": "Microsoft.Resources/deployments",
       "properties": {
         "mode": "Incremental",
@@ -388,6 +392,7 @@
     {
       "apiVersion": "2021-04-01",
       "name": "[concat('metrics-function-app-', parameters('utcValue'))]",
+      "resourceGroup": "[variables('resourceGroupName')]",
       "type": "Microsoft.Resources/deployments",
       "properties": {
         "mode": "Incremental",
@@ -507,6 +512,7 @@
     {
       "apiVersion": "2021-04-01",
       "name": "[concat('action-group-', parameters('utcValue'))]",
+      "resourceGroup": "[variables('resourceGroupName')]",
       "type": "Microsoft.Resources/deployments",
       "properties": {
         "mode": "Incremental",
