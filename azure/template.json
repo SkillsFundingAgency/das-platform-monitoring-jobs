@@ -3,13 +3,15 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "actionGroupResourceId": {
-      "type": "string"
+      "type": "string",
+      "defaultValue": ""
     },
     "amplsEnvironmentName": {
       "type": "string"
     },
     "appInsightsResourcesArray": {
-      "type": "array"
+      "type": "array",
+      "defaultValue": []
     },
     "aspInstances": {
       "type": "int",
