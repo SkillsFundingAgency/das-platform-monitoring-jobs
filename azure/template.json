@@ -2,48 +2,26 @@
   "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "environmentName": {
+    "actionGroupResourceId": {
       "type": "string"
-    },
-    "resourceEnvironmentName": {
-      "type": "string"
-    },
-    "resourceGroupLocation": {
-      "type": "string"
-    },
-    "tags": {
-      "type": "object"
     },
     "amplsEnvironmentName": {
       "type": "string"
     },
-    "serviceName": {
-      "type": "string"
+    "appInsightsResourcesArray": {
+      "type": "array"
     },
-    "loggingRedisConnectionString": {
-      "type": "securestring"
+    "aspInstances": {
+      "type": "int",
+      "defaultValue": 1
     },
-    "configurationStorageConnectionString": {
-      "type": "securestring",
-      "defaultValue": ""
+    "aspSize": {
+      "type": "string",
+      "defaultValue": "1"
     },
-    "sharedStorageAccountConnectionString": {
-      "type": "securestring"
-    },
-    "powerAutomateTeamsWebhookUri": {
-      "type": "securestring"
-    },
-    "logAnalyticsWorkspaceId": {
-      "type": "string"
-    },
-    "logAnalyticsWorkspaceKey": {
-      "type": "securestring"
-    },
-    "azureDevOpsOrganization": {
-      "type": "string"
-    },
-    "azureDevOpsProject": {
-      "type": "string"
+    "aspTier": {
+      "type": "string",
+      "defaultValue": "Standard"
     },
     "azureDevOpsAccessToken": {
       "type": "securestring"
@@ -52,17 +30,57 @@
       "type": "int",
       "defaultValue": 1
     },
-    "azureDevOpsTestQueryFromDays": {
-      "type": "int",
-      "defaultValue": 30
-    },
     "azureDevOpsMetricEnvironments": {
       "type": "string",
       "defaultValue": "PROD"
     },
+    "azureDevOpsOrganization": {
+      "type": "string"
+    },
+    "azureDevOpsProject": {
+      "type": "string"
+    },
+    "azureDevOpsTestQueryFromDays": {
+      "type": "int",
+      "defaultValue": 30
+    },
+    "configurationStorageConnectionString": {
+      "type": "securestring",
+      "defaultValue": ""
+    },
+    "deployPrivateLinkedScopedResource": {
+      "type": "bool"
+    },
+    "environmentName": {
+      "type": "string"
+    },
     "functionsExtensionVersion": {
       "type": "string",
       "defaultValue": "~3"
+    },
+    "logAnalyticsWorkspaceId": {
+      "type": "string"
+    },
+    "logAnalyticsWorkspaceKey": {
+      "type": "securestring"
+    },
+    "loggingRedisConnectionString": {
+      "type": "securestring"
+    },
+    "powerAutomateTeamsWebhookUri": {
+      "type": "securestring"
+    },
+    "resourceEnvironmentName": {
+      "type": "string"
+    },
+    "resourceGroupLocation": {
+      "type": "string"
+    },
+    "routeTable": {
+      "type": "object"
+    },
+    "serviceName": {
+      "type": "string"
     },
     "sharedEnvResourceGroup": {
       "type": "string"
@@ -70,50 +88,43 @@
     "sharedEnvVirtualNetworkName": {
       "type": "string"
     },
+    "sharedStorageAccountConnectionString": {
+      "type": "securestring"
+    },
+    "subnetDelegations": {
+      "type": "array"
+    },
     "subnetObject": {
       "type": "object"
     },
     "subnetServiceEndpointList": {
       "type": "array"
     },
-    "subnetDelegations": {
-      "type": "array"
-    },
-    "routeTable": {
+    "tags": {
       "type": "object"
-    },
-    "workerAccessRestrictions": {
-      "type": "array"
-    },
-    "aspSize": {
-      "type": "string",
-      "defaultValue": "1"
-    },
-    "aspInstances": {
-      "type": "int",
-      "defaultValue": 1
-    },
-    "aspTier": {
-      "type": "string",
-      "defaultValue": "Standard"
     },
     "utcValue": {
       "type": "string",
       "defaultValue": "[utcNow()]"
     },
-    "deployPrivateLinkedScopedResource": {
-      "type": "bool"
+    "workerAccessRestrictions": {
+      "type": "array"
     }
   },
   "variables": {
-    "deploymentUrlBase": "https://raw.githubusercontent.com/SkillsFundingAgency/das-platform-building-blocks/master/templates/",
-    "resourceNamePrefix": "[toLower(concat('das-', parameters('resourceEnvironmentName'),'-', parameters('serviceName')))]",
-    "resourceGroupName": "[concat(variables('resourceNamePrefix'), '-rg')]",
+    "actionGroupName": "[concat(variables('resourceNamePrefix'),'-algr')]",
+    "actionGroupShortName": "DAS Alerts",
+    "actionGroupWebhookReceiverName": "SlackWebhook",
     "appServicePlanName": "[concat(variables('resourceNamePrefix'),'-asp')]",
-    "monitoringFunctionAppName": "[concat(variables('resourceNamePrefix'), 'mtr' ,'-fa')]",
+    "commonAlertFunctionName": "CommonAlertSchemaWebhook",
+    "deploymentUrlBase": "https://raw.githubusercontent.com/SkillsFundingAgency/das-platform-building-blocks/master/templates/",
+    "functionAppName": "[concat(variables('resourceNamePrefix'), 'mtr','-fa')]",
     "metricsFunctionAppName": "[concat(variables('resourceNamePrefix'), 'met','-fa')]",
-    "privateLinkScopeName": "[toLower(concat('das-', parameters('amplsEnvironmentName'),'-shared-ampls'))]"
-
+    "monitoringFunctionAppName": "[concat(variables('resourceNamePrefix'), 'mtr' ,'-fa')]",
+    "privateLinkScopeName": "[toLower(concat('das-', parameters('amplsEnvironmentName'),'-shared-ampls'))]",
+    "resourceGroupName": "[concat(variables('resourceNamePrefix'), '-rg')]",
+    "resourceNamePrefix": "[toLower(concat('das-', parameters('resourceEnvironmentName'),'-', parameters('serviceName')))]",
+    "webhookServiceUri": "[concat('https://', variables('functionAppName'),'.azurewebsites.net/api/webhooks/common-alert?code=')]"
   },
   "resources": [
     {
@@ -490,6 +501,65 @@
         "[concat('metrics-function-app-insights-', parameters('utcValue'))]",
         "[concat('app-service-plan-', parameters('utcValue'))]"
       ]
+    },
+    {
+      "apiVersion": "2021-04-01",
+      "name": "[concat('action-group-', parameters('utcValue'))]",
+      "type": "Microsoft.Resources/deployments",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(variables('deploymentUrlBase'),'action-group.json')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "actionGroupName": {
+            "value": "[variables('actionGroupName')]"
+          },
+          "actionGroupShortName": {
+            "value": "[variables('actionGroupShortName')]"
+          },
+          "webhookReceiverName": {
+            "value": "[variables('actionGroupWebhookReceiverName')]"
+          },
+          "webhookServiceUri": {
+            "value": "[concat(variables('webhookServiceUri'),listsecrets(resourceId('Microsoft.Web/sites/functions', variables('functionAppName'), variables('commonAlertFunctionName')),'2015-08-01').key)]"
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "2020-06-01",
+      "name": "[concat('failure-anomalies-', parameters('appInsightsResourcesArray')[copyIndex()].appInsightsName, '-', parameters('utcValue'))]",
+      "resourceGroup": "[parameters('appInsightsResourcesArray')[copyIndex()].appInsightsResourceGroup]",
+      "type": "Microsoft.Resources/deployments",
+      "condition": "[equals(parameters('environmentName'), 'PROD')]",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(variables('deploymentUrlBase'),'failure-anomalies-alert.json')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "appInsightsName": {
+            "value": "[parameters('appInsightsResourcesArray')[copyIndex()].appInsightsName]"
+          },
+          "appInsightsResourceGroup": {
+            "value": "[parameters('appInsightsResourcesArray')[copyIndex()].appInsightsResourceGroup]"
+          },
+          "actionGroupResourceId": {
+            "value": "[parameters('actionGroupResourceId')]"
+          },
+          "severity": {
+            "value": "Sev0"
+          }
+        }
+      },
+      "copy": {
+        "name": "failureAnomaliesLoop",
+        "count": "[length(parameters('appInsightsResourcesArray'))]",
+        "mode": "Parallel"
+      }
     }
   ],
   "outputs": {
