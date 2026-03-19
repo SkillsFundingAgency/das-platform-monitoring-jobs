@@ -9,8 +9,8 @@ function Sanitize-Ascii {
 
 function Get-MessageMetadata {
     Param (
-        [String]$MonitorCondition,
-        [String]$AlertRule
+        [String]$AlertRule,
+        [String]$MonitorCondition
     )
 
     $ConditionMetadata = @{
@@ -50,7 +50,7 @@ function Get-MessageMetadata {
         }
 
         default {
-            $ConditionMetadata.TitleEmoji = ":question:"
+            $ConditionMetadata.TitleEmoji = ":questionmark:"
             break
         }
 
@@ -83,16 +83,13 @@ function Format-Title {
         [String]$MonitorCondition
     )
     
-    $MessageMetadata = Get-MessageMetadata -MonitorCondition $MonitorCondition -AlertRule $AlertRule
-    
-    $title = Sanitize-Ascii([string]($AlertRule ?? 'Alert'))
-    if ([string]::IsNullOrWhiteSpace($title)) { $title = 'Alert' }
+    $MessageMetadata = Get-MessageMetadata -AlertRule $AlertRule -MonitorCondition $MonitorCondition
 
     $Formatting = @{
         FormattedTitle = $null
         Colour         = $null
     }
-    $Formatting.FormattedTitle = "$($MessageMetadata.TitleEmoji) $($AlertData.essentials.alertRule)"
+    $Formatting.FormattedTitle = "$($MessageMetadata.TitleEmoji) $($AlertRule)"
     $Formatting.Colour = $MessageMetadata.AttachmentColour
 
     Write-Output $Formatting
@@ -101,12 +98,17 @@ function Format-Title {
 function Build-AdaptiveCard-Min {
     param([hashtable]$Ess)
 
-    $formatting = Format-Title -AlertRule [string]$Ess.alertRule -MonitorCondition [string]$Ess.monitorCondition
+    $alert = Sanitize-Ascii([string]($Ess.alertRule ?? 'Alert'))
+    if ([string]::IsNullOrWhiteSpace($alert)) { $alert = 'Alert' }
+    $cond  = Sanitize-Ascii([string]$Ess.monitorCondition)
+
+    $formatting = Format-Title -AlertRule $alert -MonitorCondition $cond
     $title = $formatting.FormattedTitle
+    Write-Information ("Formatted Title: " + $title)
     $colour = $formatting.Colour
+    Write-Information ("Card Colour: " + $colour)
 
     $sev   = Sanitize-Ascii([string]$Ess.severity)
-    $cond  = Sanitize-Ascii([string]$Ess.monitorCondition)
 
     $desc = ""
     if ($Ess.description) {
