@@ -20,37 +20,37 @@ function Get-MessageMetadata {
 
     switch -Wildcard ($AlertRule) {
         '*504 Gateway Time-out*' {
-            $ConditionMetadata.TitleEmoji = ":hourglassdone:"
+            $ConditionMetadata.TitleEmoji = "⏳"
             break
         }
 
         '*application gateway failed requests*' {
-            $ConditionMetadata.TitleEmoji = ":noentrysign:"
+            $ConditionMetadata.TitleEmoji = "🚫"
             break
         }
 
         '*Azure SQL*' {
-            $ConditionMetadata.TitleEmoji = ":filebox:"
+            $ConditionMetadata.TitleEmoji = "🗃️"
             break
         }
 
         '*Expiring App Registration Secrets*' {
-            $ConditionMetadata.TitleEmoji = ":soonarrow:"
+            $ConditionMetadata.TitleEmoji = "🔜"
             break
         }
 
         '*Failed Requests Alert*' {
-            $ConditionMetadata.TitleEmoji = ":policecarsrevolvinglight:"
+            $ConditionMetadata.TitleEmoji = "🚨"
             break
         }
 
         '*Response Time Alert*' {
-            $ConditionMetadata.TitleEmoji = ":stopwatch:"
+            $ConditionMetadata.TitleEmoji = "⏱️"
             break
         }
 
         default {
-            $ConditionMetadata.TitleEmoji = ":questionmark:"
+            $ConditionMetadata.TitleEmoji = "❓"
             break
         }
 
@@ -64,7 +64,7 @@ function Get-MessageMetadata {
 
         'Resolved' {
             $ConditionMetadata.AttachmentColour = "good"
-            $ConditionMetadata.TitleEmoji = ":heavy_check_mark:"
+            $ConditionMetadata.TitleEmoji = "✅"
             break
         }
 
