@@ -9,7 +9,7 @@ function Sanitize-Ascii {
 
 function Get-MessageMetadata {
     Param (
-        [String]$MonitorCondition
+        [String]$MonitorCondition,
         [String]$AlertRule
     )
 
@@ -79,7 +79,7 @@ function Get-MessageMetadata {
 
 function Format-Title {
     Param (
-        [String]$AlertRule
+        [String]$AlertRule,
         [String]$MonitorCondition
     )
     
