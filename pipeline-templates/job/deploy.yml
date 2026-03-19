@@ -43,16 +43,17 @@ jobs:
             ServiceConnection: ${{ parameters.ServiceConnection }}
             FunctionAppName: $(MonitoringFunctionAppName)
             DeploymentPackagePath: $(Pipeline.Workspace)/drop/SFA.DAS.Monitoring.Functions.zip
-        - task: AzureCLI@2
+        - task: AzurePowerShell@5
           displayName: Deploy Action Group
           inputs:
             azureSubscription: ${{ parameters.ServiceConnection }}
-            scriptType: bash
-            scriptLocation: inlineScript
-            inlineScript: |
-              az deployment group create --resource-group $(ResourceGroupName) --template-file action-group.json --parameters \
-                resourceEnvironmentName=$(ResourceEnvironmentName) \
-                serviceName=$(ServiceName)
+            azurePowerShellVersion: 'LatestVersion'
+            pwsh: true
+            scriptType: InlineScript
+            inline: |
+              New-AzResourceGroupDeployment -ResourceGroupName $(ResourceGroupName) -TemplateFile action-group.json `
+                -resourceEnvironmentName $(ResourceEnvironmentName) `
+                -serviceName $(ServiceName)
             workingDirectory: $(Pipeline.Workspace)/drop/azure/
 
         - ${{ if eq(parameters.Environment, 'PROD') }}:
@@ -73,14 +74,15 @@ jobs:
                   Write-Host ("AppInsightsResourceGroup:{0} AppInsightsName:{1}" -f $obj.AppInsightsResourceGroup, $obj.AppInsightsName)
               } 
             displayName: Output Application Insights Resources
-          - task: AzureCLI@2
+          - task: AzurePowerShell@5
             displayName: Deploy Failure Anomalies
             inputs:
               azureSubscription: ${{ parameters.ServiceConnection }}
-              scriptType: bash
-              scriptLocation: inlineScript
-              inlineScript: |
-                az deployment group create --resource-group $(ResourceGroupName) --template-file action-group.json --parameters \
-                  appInsightsResourcesArray=$(AppInsightsResourcesArray) \
-                  actionGroupResourceId=$(ActionGroupResourceId)
+              azurePowerShellVersion: 'LatestVersion'
+              pwsh: true
+              scriptType: InlineScript
+              inline: |
+                New-AzResourceGroupDeployment -ResourceGroupName $(ResourceGroupName) -TemplateFile action-group.json `
+                  -actionGroupResourceId $(ActionGroupResourceId) `
+                  -appInsightsResourcesArray $(AppInsightsResourcesArray)
               workingDirectory: $(Pipeline.Workspace)/drop/azure/
