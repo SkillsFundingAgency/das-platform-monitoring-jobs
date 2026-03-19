@@ -140,11 +140,11 @@ function Build-AdaptiveCard-Min {
         $items += @{ type='FactSet'; facts=$facts }
     }
 
-    $body = @(
+    $body = @{
         type = 'Container'
         style = $formatting.Colour
         items = $items
-    )
+    }
 
     return @{
         '$schema' = 'http://adaptivecards.io/schemas/adaptive-card.json'
