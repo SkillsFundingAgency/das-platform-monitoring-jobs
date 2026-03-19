@@ -308,7 +308,7 @@
             "value": "[variables('appServicePlanName')]"
           },
           "appServicePlanResourceGroup": {
-            "value": "[resourceGroup().name]"
+            "value": "[variables('resourceGroupName')]"
           },
           "subnetResourceId": {
             "value": "[reference(concat('asp-subnet-', parameters('utcValue'))).outputs.SubnetResourceId.value]"
@@ -408,7 +408,7 @@
             "value": "[variables('appServicePlanName')]"
           },
           "appServicePlanResourceGroup": {
-            "value": "[resourceGroup().name]"
+            "value": "[variables('resourceGroupName')]"
           },
           "subnetResourceId": {
             "value": "[reference(concat('asp-subnet-', parameters('utcValue'))).outputs.SubnetResourceId.value]"
