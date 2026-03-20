@@ -130,7 +130,7 @@ function Build-AdaptiveCard-Min {
     if ($cond) { $facts += @{ title='State:';    value= $cond } }
 
     $items = @(
-        @{ type='TextBlock'; text=$title; weight='Bolder'; size='Medium'; wrap=$true },
+        @{ type='TextBlock'; text=$title; style='heading'; wrap=$true },
         @{ type='TextBlock'; text=("Severity: {0} | Condition: {1}" -f $sev,$cond); isSubtle=$true; wrap=$true }
     )
 

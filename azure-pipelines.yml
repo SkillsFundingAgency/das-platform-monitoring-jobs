@@ -4,6 +4,14 @@ trigger:
     include:
       - "master"
 
+schedules:
+  - cron: '0 3 * * 1-5'
+    displayName: Daily morning run
+    branches:
+      include:
+        - "master"
+    always: true
+
 variables:
 - name: BuildPlatform
   value: any cpu
