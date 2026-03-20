@@ -14,7 +14,18 @@ function Get-DownTime {
     )
     $formattedFiredTime = [datetime]$FiredDateTime
     $formattedResolvedTime = [datetime]$ResolvedDateTime
-    return((New-TimeSpan -Start $formattedFiredTime -End $formattedResolvedTime).ToString())
+    $timeSpan = New-TimeSpan -Start $formattedFiredTime -End $formattedResolvedTime
+
+    $parts = @()
+
+    if ($timeSpan.Days -ne 0) { $parts += "$($timeSpan.Days) days" }
+    if ($timeSpan.Hours -ne 0 -or $timeSpan.Days -ne 0) { $parts += "$($timeSpan.Hours) hours" }
+    if ($timeSpan.Minutes -ne 0 -or ($timeSpan.Hours -ne 0 -or $timeSpan.Days -ne 0)) { $parts += "$($timeSpan.Minutes) minutes" }
+    if ($timeSpan.Seconds -ne 0 -or ($timeSpan.Minutes -ne 0 -or $timeSpan.Hours -ne 0 -or $timeSpan.Days -ne 0)) { $parts += "$($timeSpan.Seconds) seconds" }
+
+    $downTime = $parts -join " "
+
+    return $downTime
 }
 
 function Get-MessageMetadata {
