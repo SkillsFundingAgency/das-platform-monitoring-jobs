@@ -132,10 +132,12 @@ function Build-AdaptiveCard-Min {
 
     $facts = @()
     if ($Ess.alertRule.Contains("Azure SQL DTU") -and $Ess.configurationItems -and $Ess.configurationItems.Count -gt 0) {
-        $facts += @{ title='Resource:'; value= Sanitize-Ascii([string]$Ess.configurationItems[0]).ToLower() }
+        $facts += @{ title='Resource:';  value= Sanitize-Ascii([string]$Ess.configurationItems[0]).ToLower() }
     }
     elseif ($Ess.alertTargetIDs -and $Ess.alertTargetIDs.Count -gt 0) {
-        $facts += @{ title='Resource:'; value= Sanitize-Ascii([string]$Ess.alertTargetIDs[0]) }
+        $resource = Sanitize-Ascii([string]$Ess.alertTargetIDs[0])
+        $tenant = $env:TENANT
+        $facts += @{ title='Resource:';  value= "[$resource](https://portal.azure.com/#@$tenant/resource$resource)" }
     }
     if ($Ess.monitoringService) {
         $facts += @{ title='Service:';   value= Sanitize-Ascii([string]$Ess.monitoringService) }

@@ -97,6 +97,9 @@
     "tags": {
       "type": "object"
     },
+    "tenant": {
+      "type": "string"
+    },
     "utcValue": {
       "type": "string",
       "defaultValue": "[utcNow()]"
@@ -360,6 +363,10 @@
                 {
                   "name": "FUNCTIONS_WORKER_RUNTIME",
                   "value": "powershell"
+                },
+                {
+                  "name": "TENANT",
+                  "value": "[parameters('tenant')]"
                 },
                 {
                   "name": "WEBSITE_RUN_FROM_PACKAGE",
