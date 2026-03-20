@@ -7,6 +7,16 @@ function Sanitize-Ascii {
     return ($Text -replace '[^\u0009\u000A\u000D\u0020-\u007E]', ' ')
 }
 
+function Get-DownTime {
+    Param (
+        [string]$FiredDateTime,
+        [string]$ResolvedDateTime
+    )
+    $formattedFiredTime = [datetime]$FiredDateTime
+    $formattedResolvedTime = [datetime]$ResolvedDateTime
+    return((New-TimeSpan -Start $formattedFiredTime -End $formattedResolvedTime).ToString())
+}
+
 function Get-MessageMetadata {
     Param (
         [String]$AlertRule,
@@ -104,9 +114,7 @@ function Build-AdaptiveCard-Min {
 
     $formatting = Format-Title -AlertRule $alert -MonitorCondition $cond
     $title = $formatting.FormattedTitle
-    Write-Information ("Formatted Title: " + $title)
     $colour = $formatting.Colour
-    Write-Information ("Card Colour: " + $colour)
 
     $sev   = Sanitize-Ascii([string]$Ess.severity)
 
@@ -118,13 +126,19 @@ function Build-AdaptiveCard-Min {
 
     $facts = @()
     if ($Ess.alertTargetIDs -and $Ess.alertTargetIDs.Count -gt 0) {
-        $facts += @{ title='Resource:'; value= Sanitize-Ascii([string]$Ess.alertTargetIDs[0]) }
+        $facts += @{ title='Resource:';  value= Sanitize-Ascii([string]$Ess.alertTargetIDs[0]) }
     }
     if ($Ess.monitoringService) {
-        $facts += @{ title='Service:';  value= Sanitize-Ascii([string]$Ess.monitoringService) }
+        $facts += @{ title='Service:';   value= Sanitize-Ascii([string]$Ess.monitoringService) }
     }
     if ($Ess.firedDateTime) {
-        $facts += @{ title='Fired:';    value= Sanitize-Ascii([string]$Ess.firedDateTime) }
+        $facts += @{ title='Fired:';     value= Sanitize-Ascii([string]$Ess.firedDateTime) }
+    }
+    if ($Ess.resolvedDateTime) {
+        $resolvedDateTime = Sanitize-Ascii([string]$Ess.resolvedDateTime)
+        $firedDateTime = Sanitize-Ascii([string]$Ess.firedDateTime)
+        $downTime = Get-DownTime -FiredDateTime $firedDateTime -ResolvedDateTime $resolvedDateTime
+        $facts += @{ title='Down time:'; value= $downTime }
     }
     if ($sev)  { $facts += @{ title='Severity:'; value= $sev } }
     if ($cond) { $facts += @{ title='State:';    value= $cond } }
