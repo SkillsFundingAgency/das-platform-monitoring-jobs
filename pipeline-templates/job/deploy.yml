@@ -1,0 +1,88 @@
+parameters:
+  ServiceConnection:
+  Environment:
+
+jobs:
+- deployment: DeployFunctionApp
+  pool:
+    name: DAS - Continuous Deployment Agents
+  environment: ${{ parameters.Environment }}
+  strategy:
+    runOnce:
+      deploy:
+        steps:
+        - template: azure-pipelines-templates/deploy/step/wait-azure-devops-deployment.yml@das-platform-building-blocks
+          parameters:
+            ServiceConnection: ${{ parameters.ServiceConnection }}
+            EnvironmentId: $(Environment.Id)
+            PipelineName: $(Build.DefinitionName)
+            RunId: $(Build.BuildId)
+        - template: azure-pipelines-templates/deploy/step/arm-deploy.yml@das-platform-building-blocks
+          parameters:
+            ServiceConnection: ${{ parameters.ServiceConnection }}
+            SubscriptionId: $(SubscriptionId)
+            Location: $(ResourceGroupLocation)
+            Environment: ${{ parameters.Environment }}
+            TemplatePath: $(Pipeline.Workspace)/drop/azure/template.json
+            ParametersPath: $(Pipeline.Workspace)/drop/azure/template.parameters.json
+            IsMultiRepoCheckout: true
+            TemplateSecrets:
+              AzureDevOpsAccessToken: $(AzureDevOpsAccessToken)
+              ConfigurationStorageConnectionString: $(ConfigurationStorageConnectionString)
+              LogAnalyticsWorkspaceKey: $(LogAnalyticsWorkspaceKey)
+              LoggingRedisConnectionString: $(LoggingRedisConnectionString)
+              PowerAutomateTeamsWebhookUri: $(PowerAutomateTeamsWebhookUri)
+              SharedStorageAccountConnectionString: $(SharedStorageAccountConnectionString)
+        - template: azure-pipelines-templates/deploy/step/function-deploy.yml@das-platform-building-blocks
+          parameters:
+            ServiceConnection: ${{ parameters.ServiceConnection }}
+            FunctionAppName: $(MetricsFunctionAppName)
+            DeploymentPackagePath: $(Pipeline.Workspace)/drop/SFA.DAS.AzureDevOps.Metrics.Functions.zip
+        - template: azure-pipelines-templates/deploy/step/function-deploy.yml@das-platform-building-blocks
+          parameters:
+            ServiceConnection: ${{ parameters.ServiceConnection }}
+            FunctionAppName: $(MonitoringFunctionAppName)
+            DeploymentPackagePath: $(Pipeline.Workspace)/drop/SFA.DAS.Monitoring.Functions.zip
+        - task: AzurePowerShell@5
+          displayName: Deploy Action Group
+          inputs:
+            azureSubscription: ${{ parameters.ServiceConnection }}
+            azurePowerShellVersion: 'LatestVersion'
+            pwsh: true
+            scriptType: InlineScript
+            inline: |
+              New-AzResourceGroupDeployment -ResourceGroupName $(ResourceGroupName) -TemplateFile action-group.json `
+                -resourceEnvironmentName $(ResourceEnvironmentName) `
+                -serviceName $(ServiceName)
+            workingDirectory: $(Pipeline.Workspace)/drop/azure/
+
+        - ${{ if eq(parameters.Environment, 'PROD') }}:
+          - task: AzurePowerShell@5
+            displayName: Get Application Insights Resources
+            inputs:
+              azureSubscription: ${{ parameters.ServiceConnection }}
+              ScriptPath: $(Pipeline.Workspace)/drop/tools/Get-AppInsightsResources.ps1
+              ScriptArguments: '-AppInsightsNamePrefix $(AppInsightsNamePrefix)'
+              azurePowerShellVersion: LatestVersion
+              pwsh: true
+          - powershell: |
+              [string] $AppInsightsResourcesArrayString= $Env:APP_INSIGHTS_RESOURCES_ARRAY_STRING
+                Write-Host "The APP_INSIGHTS_RESOURCES_ARRAY_STRING environment variable value is '$AppInsightsResourcesArrayString'."
+              
+              $AppInsightsResourcesArray= $AppInsightsResourcesArrayString | ConvertFrom-Json
+              foreach( $obj in $AppInsightsResourcesArray){
+                  Write-Host ("AppInsightsResourceGroup:{0} AppInsightsName:{1}" -f $obj.AppInsightsResourceGroup, $obj.AppInsightsName)
+              } 
+            displayName: Output Application Insights Resources
+          - task: AzurePowerShell@5
+            displayName: Deploy Failure Anomalies
+            inputs:
+              azureSubscription: ${{ parameters.ServiceConnection }}
+              azurePowerShellVersion: 'LatestVersion'
+              pwsh: true
+              scriptType: InlineScript
+              inline: |
+                New-AzResourceGroupDeployment -ResourceGroupName $(ResourceGroupName) -TemplateFile action-group.json `
+                  -actionGroupResourceId $(ActionGroupResourceId) `
+                  -appInsightsResourcesArray $(AppInsightsResourcesArray)
+              workingDirectory: $(Pipeline.Workspace)/drop/azure/

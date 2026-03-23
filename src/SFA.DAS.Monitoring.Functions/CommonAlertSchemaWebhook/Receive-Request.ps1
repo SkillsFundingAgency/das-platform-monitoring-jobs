@@ -7,14 +7,122 @@ function Sanitize-Ascii {
     return ($Text -replace '[^\u0009\u000A\u000D\u0020-\u007E]', ' ')
 }
 
+function Get-DownTime {
+    Param (
+        [string]$FiredDateTime,
+        [string]$ResolvedDateTime
+    )
+    $formattedFiredTime = [datetime]$FiredDateTime
+    $formattedResolvedTime = [datetime]$ResolvedDateTime
+    $timeSpan = New-TimeSpan -Start $formattedFiredTime -End $formattedResolvedTime
+
+    $parts = @()
+
+    if ($timeSpan.Days -ne 0) { $parts += "$($timeSpan.Days) days" }
+    if ($timeSpan.Hours -ne 0 -or $timeSpan.Days -ne 0) { $parts += "$($timeSpan.Hours) hours" }
+    if ($timeSpan.Minutes -ne 0 -or ($timeSpan.Hours -ne 0 -or $timeSpan.Days -ne 0)) { $parts += "$($timeSpan.Minutes) minutes" }
+    if ($timeSpan.Seconds -ne 0 -or ($timeSpan.Minutes -ne 0 -or $timeSpan.Hours -ne 0 -or $timeSpan.Days -ne 0)) { $parts += "$($timeSpan.Seconds) seconds" }
+
+    $downTime = $parts -join " "
+
+    return $downTime
+}
+
+function Get-MessageMetadata {
+    Param (
+        [String]$AlertRule,
+        [String]$MonitorCondition
+    )
+
+    $ConditionMetadata = @{
+        AttachmentColour = $null
+        TitleEmoji       = $null
+    }
+
+    switch -Wildcard ($AlertRule) {
+        '*504 Gateway Time-out*' {
+            $ConditionMetadata.TitleEmoji = "⏳"
+            break
+        }
+
+        '*application gateway failed requests*' {
+            $ConditionMetadata.TitleEmoji = "🚫"
+            break
+        }
+
+        '*Azure SQL*' {
+            $ConditionMetadata.TitleEmoji = "🗃️"
+            break
+        }
+
+        '*Failed Requests Alert*' {
+            $ConditionMetadata.TitleEmoji = "🚨"
+            break
+        }
+
+        '*Response Time Alert*' {
+            $ConditionMetadata.TitleEmoji = "⏱️"
+            break
+        }
+
+        default {
+            $ConditionMetadata.TitleEmoji = "❓"
+            break
+        }
+
+    }
+
+    switch ($MonitorCondition) {
+        'Fired' {
+            $ConditionMetadata.AttachmentColour = "attention"
+            break
+        }
+
+        'Resolved' {
+            $ConditionMetadata.AttachmentColour = "good"
+            $ConditionMetadata.TitleEmoji = "✅"
+            break
+        }
+
+        default {
+            $ConditionMetadata.AttachmentColour = "attention"
+            break
+        }
+    }
+
+    Write-Output $ConditionMetadata
+}
+
+function Format-Title {
+    Param (
+        [String]$AlertRule,
+        [String]$MonitorCondition
+    )
+    
+    $MessageMetadata = Get-MessageMetadata -AlertRule $AlertRule -MonitorCondition $MonitorCondition
+
+    $Formatting = @{
+        FormattedTitle = $null
+        Colour         = $null
+    }
+    $Formatting.FormattedTitle = "$($MessageMetadata.TitleEmoji) $($AlertRule)"
+    $Formatting.Colour = $MessageMetadata.AttachmentColour
+
+    Write-Output $Formatting
+}
+
 function Build-AdaptiveCard-Min {
     param([hashtable]$Ess)
 
-    $title = Sanitize-Ascii([string]($Ess.alertRule ?? 'Alert'))
-    if ([string]::IsNullOrWhiteSpace($title)) { $title = 'Alert' }
+    $alert = Sanitize-Ascii([string]($Ess.alertRule ?? 'Alert'))
+    if ([string]::IsNullOrWhiteSpace($alert)) { $alert = 'Alert' }
+    $cond  = Sanitize-Ascii([string]$Ess.monitorCondition)
+
+    $formatting = Format-Title -AlertRule $alert -MonitorCondition $cond
+    $title = $formatting.FormattedTitle
+    $colour = $formatting.Colour
 
     $sev   = Sanitize-Ascii([string]$Ess.severity)
-    $cond  = Sanitize-Ascii([string]$Ess.monitorCondition)
 
     $desc = ""
     if ($Ess.description) {
@@ -23,36 +131,53 @@ function Build-AdaptiveCard-Min {
     }
 
     $facts = @()
-    if ($Ess.alertTargetIDs -and $Ess.alertTargetIDs.Count -gt 0) {
-        $facts += @{ title='Resource:'; value= Sanitize-Ascii([string]$Ess.alertTargetIDs[0]) }
+    if ($Ess.alertRule.Contains("Azure SQL DTU") -and $Ess.configurationItems -and $Ess.configurationItems.Count -gt 0) {
+        $facts += @{ title='Resource:';  value= Sanitize-Ascii([string]$Ess.configurationItems[0]).ToLower() }
+    }
+    elseif ($Ess.alertTargetIDs -and $Ess.alertTargetIDs.Count -gt 0) {
+        $resource = Sanitize-Ascii([string]$Ess.alertTargetIDs[0])
+        $tenant = $env:TENANT
+        $facts += @{ title='Resource:';  value= "[$resource](https://portal.azure.com/#@$tenant/resource$resource)" }
     }
     if ($Ess.monitoringService) {
-        $facts += @{ title='Service:';  value= Sanitize-Ascii([string]$Ess.monitoringService) }
+        $facts += @{ title='Service:';   value= Sanitize-Ascii([string]$Ess.monitoringService) }
     }
     if ($Ess.firedDateTime) {
-        $facts += @{ title='Fired:';    value= Sanitize-Ascii([string]$Ess.firedDateTime) }
+        $facts += @{ title='Fired:';     value= Sanitize-Ascii([string]$Ess.firedDateTime) }
+    }
+    if ($Ess.resolvedDateTime) {
+        $resolvedDateTime = Sanitize-Ascii([string]$Ess.resolvedDateTime)
+        $firedDateTime = Sanitize-Ascii([string]$Ess.firedDateTime)
+        $downTime = Get-DownTime -FiredDateTime $firedDateTime -ResolvedDateTime $resolvedDateTime
+        $facts += @{ title='Down time:'; value= $downTime }
     }
     if ($sev)  { $facts += @{ title='Severity:'; value= $sev } }
     if ($cond) { $facts += @{ title='State:';    value= $cond } }
 
-    $body = @(
-        @{ type='TextBlock'; text=$title; weight='Bolder'; size='Medium'; wrap=$true },
+    $items = @(
+        @{ type='TextBlock'; text=$title; style='heading'; wrap=$true },
         @{ type='TextBlock'; text=("Severity: {0} | Condition: {1}" -f $sev,$cond); isSubtle=$true; wrap=$true }
     )
 
     if (-not [string]::IsNullOrWhiteSpace($desc)) {
-        $body += @{ type='TextBlock'; text=$desc; wrap=$true }
+        $items += @{ type='TextBlock'; text=$desc; wrap=$true }
     }
 
     if ($facts.Count -gt 0) {
-        $body += @{ type='FactSet'; facts=$facts }
+        $items += @{ type='FactSet'; facts=$facts }
+    }
+
+    $body = @{
+        type = 'Container'
+        style = $formatting.Colour
+        items = $items
     }
 
     return @{
         '$schema' = 'http://adaptivecards.io/schemas/adaptive-card.json'
         type      = 'AdaptiveCard'
         version   = '1.4'
-        body      = $body
+        body      = @($body)
     }
 }
 

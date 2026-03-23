@@ -2,44 +2,79 @@ trigger:
   batch: true
   branches:
     include:
-      - "*"
+      - "master"
 
-pr: none
+schedules:
+  - cron: '0 3 * * 1-5'
+    displayName: Daily morning run
+    branches:
+      include:
+        - "master"
+    always: true
 
-workspace:
-    clean: all
+variables:
+- name: BuildPlatform
+  value: any cpu
+- group: RELEASE Management Resources
+- group: RELEASE das-platform-monitoring-jobs
+- name: Deploy
+  value: $[or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), eq(variables['Build.Reason'], 'Manual'), eq(variables['Build.Reason'], 'PullRequest'))]
 
-pool:
-  name: 'DAS - Continuous Integration'
+resources:
+  repositories:
+  - repository: self
+  - repository: das-platform-building-blocks
+    type: github
+    name: SkillsFundingAgency/das-platform-building-blocks
+    ref: refs/tags/3.0.27
+    endpoint: SkillsFundingAgency
+  - repository: das-platform-automation
+    type: github
+    name: SkillsFundingAgency/das-platform-automation
+    ref: refs/tags/5.1.21
+    endpoint: SkillsFundingAgency
 
-steps:
-- task: gittools.gitversion.gitversion-task.GitVersion@5
-  displayName: GitVersion
+stages:
+- stage: Build
+  jobs:
+  - template: pipeline-templates/job/code-build.yml
 
-- task: CopyFiles@2
-  displayName: 'Copy Function files'
-  inputs:
-    sourceFolder: '$(Build.SourcesDirectory)'
-    contents: |
-      azure/**
-      tools/Get-AppInsightsResources.ps1
-    targetFolder: $(Build.ArtifactStagingDirectory)
+- stage: Deploy_DEV
+  dependsOn: Build
+  displayName: Deploy to DEV
+  condition: and(succeeded(), eq(variables.Deploy, 'true'))
+  variables:
+  - group: Dev Management Resources
+  - group: AT DevTest Shared Resources
+  - group: DEV das-platform-monitoring-jobs
+  jobs:
+  - template: pipeline-templates/job/deploy.yml
+    parameters:
+      Environment: DEV
+      ServiceConnection: SFA-DAS-DevTest-ARM
 
-- task: ArchiveFiles@2
-  inputs:
-    rootFolderOrFile: '$(Build.SourcesDirectory)/src/SFA.DAS.Monitoring.Functions'
-    includeRootFolder: false
-    archiveType: zip
-    archiveFile: '$(Build.ArtifactStagingDirectory)/SFA.DAS.Monitoring.Functions.zip'
+- stage: Deploy_PREPROD
+  dependsOn: Deploy_DEV
+  displayName: Deploy to PREPROD
+  variables:
+  - group: PreProd Management Resources
+  - group: PreProd Shared Resources
+  - group: PREPROD das-platform-monitoring-jobs
+  jobs:
+  - template: pipeline-templates/job/deploy.yml
+    parameters:
+      Environment: PREPROD
+      ServiceConnection: SFA-DIG-PreProd-ARM
 
-- task: ArchiveFiles@2
-  inputs:
-    rootFolderOrFile: '$(Build.SourcesDirectory)/src/SFA.DAS.AzureDevOps.Metrics.Functions'
-    includeRootFolder: false
-    archiveType: zip
-    archiveFile: '$(Build.ArtifactStagingDirectory)/SFA.DAS.AzureDevOps.Metrics.Functions.zip'
-
-- task: PublishBuildArtifacts@1
-  displayName: Publish Artifact
-  inputs:
-    pathtoPublish: $(Build.ArtifactStagingDirectory)
+- stage: Deploy_PROD
+  dependsOn: Deploy_PREPROD
+  displayName: Deploy to PROD
+  variables:
+  - group: Prod Management Resources
+  - group: Prod Shared Resources
+  - group: PROD das-platform-monitoring-jobs
+  jobs:
+  - template: pipeline-templates/job/deploy.yml
+    parameters:
+      Environment: PROD
+      ServiceConnection: SFA-DIG-Prod-ARM

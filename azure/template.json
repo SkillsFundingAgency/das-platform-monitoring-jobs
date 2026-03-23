@@ -1,43 +1,21 @@
 {
-  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "environmentName": {
-      "type": "string"
-    },
-    "resourceEnvironmentName": {
-      "type": "string"
-    },
     "amplsEnvironmentName": {
       "type": "string"
     },
-    "serviceName": {
-      "type": "string"
+    "aspInstances": {
+      "type": "int",
+      "defaultValue": 1
     },
-    "loggingRedisConnectionString": {
-      "type": "securestring"
+    "aspSize": {
+      "type": "string",
+      "defaultValue": "1"
     },
-    "configurationStorageConnectionString": {
-      "type": "securestring",
-      "defaultValue": ""
-    },
-    "sharedStorageAccountConnectionString": {
-      "type": "securestring"
-    },
-    "powerAutomateTeamsWebhookUri": {
-      "type": "securestring"
-    },
-    "logAnalyticsWorkspaceId": {
-      "type": "string"
-    },
-    "logAnalyticsWorkspaceKey": {
-      "type": "securestring"
-    },
-    "azureDevOpsOrganization": {
-      "type": "string"
-    },
-    "azureDevOpsProject": {
-      "type": "string"
+    "aspTier": {
+      "type": "string",
+      "defaultValue": "Standard"
     },
     "azureDevOpsAccessToken": {
       "type": "securestring"
@@ -46,17 +24,57 @@
       "type": "int",
       "defaultValue": 1
     },
-    "azureDevOpsTestQueryFromDays": {
-      "type": "int",
-      "defaultValue": 30
-    },
     "azureDevOpsMetricEnvironments": {
       "type": "string",
       "defaultValue": "PROD"
     },
+    "azureDevOpsOrganization": {
+      "type": "string"
+    },
+    "azureDevOpsProject": {
+      "type": "string"
+    },
+    "azureDevOpsTestQueryFromDays": {
+      "type": "int",
+      "defaultValue": 30
+    },
+    "configurationStorageConnectionString": {
+      "type": "securestring",
+      "defaultValue": ""
+    },
+    "deployPrivateLinkedScopedResource": {
+      "type": "bool"
+    },
+    "environmentName": {
+      "type": "string"
+    },
     "functionsExtensionVersion": {
       "type": "string",
       "defaultValue": "~3"
+    },
+    "logAnalyticsWorkspaceId": {
+      "type": "string"
+    },
+    "logAnalyticsWorkspaceKey": {
+      "type": "securestring"
+    },
+    "loggingRedisConnectionString": {
+      "type": "securestring"
+    },
+    "powerAutomateTeamsWebhookUri": {
+      "type": "securestring"
+    },
+    "resourceEnvironmentName": {
+      "type": "string"
+    },
+    "resourceGroupLocation": {
+      "type": "string"
+    },
+    "routeTable": {
+      "type": "object"
+    },
+    "serviceName": {
+      "type": "string"
     },
     "sharedEnvResourceGroup": {
       "type": "string"
@@ -64,53 +82,52 @@
     "sharedEnvVirtualNetworkName": {
       "type": "string"
     },
+    "sharedStorageAccountConnectionString": {
+      "type": "securestring"
+    },
+    "subnetDelegations": {
+      "type": "array"
+    },
     "subnetObject": {
       "type": "object"
     },
     "subnetServiceEndpointList": {
       "type": "array"
     },
-    "subnetDelegations": {
-      "type": "array"
-    },
-    "routeTable": {
+    "tags": {
       "type": "object"
     },
-    "workerAccessRestrictions": {
-      "type": "array"
-    },
-    "aspSize": {
-      "type": "string",
-      "defaultValue": "1"
-    },
-    "aspInstances": {
-      "type": "int",
-      "defaultValue": 1
-    },
-    "aspTier": {
-      "type": "string",
-      "defaultValue": "Standard"
+    "tenant": {
+      "type": "string"
     },
     "utcValue": {
       "type": "string",
       "defaultValue": "[utcNow()]"
     },
-    "deployPrivateLinkedScopedResource": {
-      "type": "bool"
+    "workerAccessRestrictions": {
+      "type": "array"
     }
   },
   "variables": {
-    "deploymentUrlBase": "https://raw.githubusercontent.com/SkillsFundingAgency/das-platform-building-blocks/master/templates/",
-    "resourceNamePrefix": "[toLower(concat('das-', parameters('resourceEnvironmentName'),'-', parameters('serviceName')))]",
     "appServicePlanName": "[concat(variables('resourceNamePrefix'),'-asp')]",
-    "monitoringFunctionAppName": "[concat(variables('resourceNamePrefix'), 'mtr' ,'-fa')]",
+    "deploymentUrlBase": "https://raw.githubusercontent.com/SkillsFundingAgency/das-platform-building-blocks/master/templates/",
     "metricsFunctionAppName": "[concat(variables('resourceNamePrefix'), 'met','-fa')]",
-    "privateLinkScopeName": "[toLower(concat('das-', parameters('amplsEnvironmentName'),'-shared-ampls'))]"
-
+    "monitoringFunctionAppName": "[concat(variables('resourceNamePrefix'), 'mtr' ,'-fa')]",
+    "privateLinkScopeName": "[toLower(concat('das-', parameters('amplsEnvironmentName'),'-shared-ampls'))]",
+    "resourceGroupName": "[concat(variables('resourceNamePrefix'), '-rg')]",
+    "resourceNamePrefix": "[toLower(concat('das-', parameters('resourceEnvironmentName'),'-', parameters('serviceName')))]"
   },
   "resources": [
     {
-      "apiVersion": "2017-05-10",
+      "apiVersion": "2021-04-01",
+      "name": "[variables('resourceGroupName')]",
+      "type": "Microsoft.Resources/resourceGroups",
+      "location": "[parameters('resourceGroupLocation')]",
+      "tags": "[parameters('tags')]",
+      "properties": {}
+    },
+    {
+      "apiVersion": "2021-04-01",
       "name": "[concat('asp-subnet-', parameters('utcValue'))]",
       "resourceGroup": "[parameters('sharedEnvResourceGroup')]",
       "type": "Microsoft.Resources/deployments",
@@ -143,8 +160,9 @@
       }
     },
     {
-      "apiVersion": "2017-05-10",
+      "apiVersion": "2021-04-01",
       "name": "[concat('app-service-plan-', parameters('utcValue'))]",
+      "resourceGroup": "[variables('resourceGroupName')]",
       "type": "Microsoft.Resources/deployments",
       "properties": {
         "mode": "Incremental",
@@ -169,8 +187,9 @@
       }
     },
     {
-      "apiVersion": "2017-05-10",
+      "apiVersion": "2021-04-01",
       "name": "[concat('metrics-function-app-insights-', parameters('utcValue'))]",
+      "resourceGroup": "[variables('resourceGroupName')]",
       "type": "Microsoft.Resources/deployments",
       "properties": {
         "mode": "Incremental",
@@ -192,8 +211,8 @@
       "condition": "[parameters('deployPrivateLinkedScopedResource')]",
       "apiVersion": "2021-04-01",
       "name": "[concat(variables('metricsFunctionAppName'), '-private-link-scoped-', parameters('utcValue'))]",
-      "type": "Microsoft.Resources/deployments",
       "resourceGroup": "[parameters('sharedEnvResourceGroup')]",
+      "type": "Microsoft.Resources/deployments",
       "properties": {
         "mode": "Incremental",
         "templateLink": {
@@ -214,8 +233,9 @@
       }
     },
     {
-      "apiVersion": "2017-05-10",
+      "apiVersion": "2021-04-01",
       "name": "[concat('monitoring-function-app-insights-', parameters('utcValue'))]",
+      "resourceGroup": "[variables('resourceGroupName')]",
       "type": "Microsoft.Resources/deployments",
       "properties": {
         "mode": "Incremental",
@@ -237,8 +257,8 @@
       "condition": "[parameters('deployPrivateLinkedScopedResource')]",
       "apiVersion": "2021-04-01",
       "name": "[concat(variables('monitoringFunctionAppName'), '-private-link-scoped-', parameters('utcValue'))]",
-      "type": "Microsoft.Resources/deployments",
       "resourceGroup": "[parameters('sharedEnvResourceGroup')]",
+      "type": "Microsoft.Resources/deployments",
       "properties": {
         "mode": "Incremental",
         "templateLink": {
@@ -259,8 +279,9 @@
       }
     },
     {
-      "apiVersion": "2017-05-10",
+      "apiVersion": "2021-04-01",
       "name": "[concat('monitoring-function-app-', parameters('utcValue'))]",
+      "resourceGroup": "[variables('resourceGroupName')]",
       "type": "Microsoft.Resources/deployments",
       "properties": {
         "mode": "Incremental",
@@ -276,7 +297,7 @@
             "value": "[variables('appServicePlanName')]"
           },
           "appServicePlanResourceGroup": {
-            "value": "[resourceGroup().name]"
+            "value": "[variables('resourceGroupName')]"
           },
           "subnetResourceId": {
             "value": "[reference(concat('asp-subnet-', parameters('utcValue'))).outputs.SubnetResourceId.value]"
@@ -344,6 +365,10 @@
                   "value": "powershell"
                 },
                 {
+                  "name": "TENANT",
+                  "value": "[parameters('tenant')]"
+                },
+                {
                   "name": "WEBSITE_RUN_FROM_PACKAGE",
                   "value": "1"
                 }
@@ -358,8 +383,9 @@
       ]
     },
     {
-      "apiVersion": "2017-05-10",
+      "apiVersion": "2021-04-01",
       "name": "[concat('metrics-function-app-', parameters('utcValue'))]",
+      "resourceGroup": "[variables('resourceGroupName')]",
       "type": "Microsoft.Resources/deployments",
       "properties": {
         "mode": "Incremental",
@@ -375,7 +401,7 @@
             "value": "[variables('appServicePlanName')]"
           },
           "appServicePlanResourceGroup": {
-            "value": "[resourceGroup().name]"
+            "value": "[variables('resourceGroupName')]"
           },
           "subnetResourceId": {
             "value": "[reference(concat('asp-subnet-', parameters('utcValue'))).outputs.SubnetResourceId.value]"
@@ -485,6 +511,10 @@
     "MetricsFunctionAppName": {
       "type": "string",
       "value": "[variables('metricsFunctionAppName')]"
+    },
+    "ResourceGroupName": {
+      "type": "string",
+      "value": "[variables('resourceGroupName')]"
     }
   }
 }
