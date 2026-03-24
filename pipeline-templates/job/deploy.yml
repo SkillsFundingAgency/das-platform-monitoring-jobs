@@ -84,5 +84,5 @@ jobs:
               inline: |
                 New-AzResourceGroupDeployment -ResourceGroupName $(ResourceGroupName) -TemplateFile failure-anomalies.json `
                   -actionGroupResourceId $(ActionGroupResourceId) `
-                  -appInsightsResourcesArray $(AppInsightsResourcesArray)
+                  -appInsightsResourcesArray '$(AppInsightsResourcesArray)'
               workingDirectory: $(Pipeline.Workspace)/drop/azure/
