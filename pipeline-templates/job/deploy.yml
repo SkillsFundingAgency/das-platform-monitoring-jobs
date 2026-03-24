@@ -82,7 +82,7 @@ jobs:
               pwsh: true
               scriptType: InlineScript
               inline: |
-                New-AzResourceGroupDeployment -ResourceGroupName $(ResourceGroupName) -TemplateFile action-group.json `
+                New-AzResourceGroupDeployment -ResourceGroupName $(ResourceGroupName) -TemplateFile failure-anomalies.json `
                   -actionGroupResourceId $(ActionGroupResourceId) `
                   -appInsightsResourcesArray $(AppInsightsResourcesArray)
               workingDirectory: $(Pipeline.Workspace)/drop/azure/
