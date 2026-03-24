@@ -69,21 +69,30 @@ jobs:
               [string] $AppInsightsResourcesArrayString = $Env:APP_INSIGHTS_RESOURCES_ARRAY_STRING
                 Write-Host "The APP_INSIGHTS_RESOURCES_ARRAY_STRING environment variable value is '$AppInsightsResourcesArrayString'."
               
-              $AppInsightsResourcesArray= $AppInsightsResourcesArrayString | ConvertFrom-Json
+              $AppInsightsResourcesArray = $AppInsightsResourcesArrayString | ConvertFrom-Json
               foreach( $obj in $AppInsightsResourcesArray){
                   Write-Host ("AppInsightsResourceGroup:{0} AppInsightsName:{1}" -f $obj.AppInsightsResourceGroup, $obj.AppInsightsName)
               }
-              Write-Output "##vso[task.setvariable variable=AppInsightsResourcesArray]$($AppInsightsResourcesArray)"
             displayName: Output Application Insights Resources
-          - task: AzurePowerShell@5
+          - task: AzureResourceManagerTemplateDeployment@3
             displayName: Deploy Failure Anomalies
             inputs:
-              azureSubscription: ${{ parameters.ServiceConnection }}
-              azurePowerShellVersion: 'LatestVersion'
-              pwsh: true
-              scriptType: InlineScript
-              inline: |
-                New-AzResourceGroupDeployment -ResourceGroupName $(ResourceGroupName) -TemplateFile failure-anomalies.json `
-                  -actionGroupResourceId $(ActionGroupResourceId) `
-                  -appInsightsResourcesArray $(AppInsightsResourcesArray)
-              workingDirectory: $(Pipeline.Workspace)/drop/azure/
+              deploymentScope: Resource Group
+              azureResourceManagerConnection: ${{ parameters.ServiceConnection }}
+              subscriptionId: $(SubscriptionId)
+              location: $(ResourceGroupLocation)
+              csmFile: $(Pipeline.Workspace)/drop/azure/failure-anomalies.json
+              overrideParameters: '-appInsightsResourcesArray $(AppInsightsResourcesArray) -actionGroupResourceId $(ActionGroupResourceId)'
+              deploymentName: das-application-insights-failure-anomalies
+          # - task: AzurePowerShell@5
+          #   displayName: Deploy Failure Anomalies
+          #   inputs:
+          #     azureSubscription: ${{ parameters.ServiceConnection }}
+          #     azurePowerShellVersion: 'LatestVersion'
+          #     pwsh: true
+          #     scriptType: InlineScript
+          #     inline: |
+          #       New-AzResourceGroupDeployment -ResourceGroupName $(ResourceGroupName) -TemplateFile failure-anomalies.json `
+          #         -actionGroupResourceId $(ActionGroupResourceId) `
+          #         -appInsightsResourcesArray $(AppInsightsResourcesArray)
+          #     workingDirectory: $(Pipeline.Workspace)/drop/azure/
