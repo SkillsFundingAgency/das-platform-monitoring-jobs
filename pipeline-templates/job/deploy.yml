@@ -44,7 +44,7 @@ jobs:
             FunctionAppName: $(MonitoringFunctionAppName)
             DeploymentPackagePath: $(Pipeline.Workspace)/drop/SFA.DAS.Monitoring.Functions.zip
         - task: AzureResourceManagerTemplateDeployment@3
-          displayName: Deploy Failure Anomalies
+          displayName: Deploy Action Group
           inputs:
             deploymentScope: Resource Group
             azureResourceManagerConnection: ${{ parameters.ServiceConnection }}
@@ -55,7 +55,7 @@ jobs:
             templateLocation: Linked artifact
             csmFile: $(Pipeline.Workspace)/drop/azure/action-group.json
             overrideParameters: '-resourceEnvironmentName $(ResourceEnvironmentName) -serviceName $(ServiceName))'
-            deploymentName: das-application-insights-failure-anomalies
+            deploymentName: das-platform-monitoring-jobs-action-group
 
         - ${{ if eq(parameters.Environment, 'PROD') }}:
           - task: AzurePowerShell@5
