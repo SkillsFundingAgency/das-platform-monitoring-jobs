@@ -43,18 +43,19 @@ jobs:
             ServiceConnection: ${{ parameters.ServiceConnection }}
             FunctionAppName: $(MonitoringFunctionAppName)
             DeploymentPackagePath: $(Pipeline.Workspace)/drop/SFA.DAS.Monitoring.Functions.zip
-        - task: AzurePowerShell@5
+        - task: AzureResourceManagerTemplateDeployment@3
           displayName: Deploy Action Group
           inputs:
-            azureSubscription: ${{ parameters.ServiceConnection }}
-            azurePowerShellVersion: 'LatestVersion'
-            pwsh: true
-            scriptType: InlineScript
-            inline: |
-              New-AzResourceGroupDeployment -ResourceGroupName $(ResourceGroupName) -TemplateFile action-group.json `
-                -resourceEnvironmentName $(ResourceEnvironmentName) `
-                -serviceName $(ServiceName)
-            workingDirectory: $(Pipeline.Workspace)/drop/azure/
+            deploymentScope: Resource Group
+            azureResourceManagerConnection: ${{ parameters.ServiceConnection }}
+            subscriptionId: $(SubscriptionId)
+            action: Create Or Update Resource Group
+            resourceGroupName: $(ResourceGroupName)
+            location: $(ResourceGroupLocation)
+            templateLocation: Linked artifact
+            csmFile: $(Pipeline.Workspace)/drop/azure/action-group.json
+            overrideParameters: '-resourceEnvironmentName $(ResourceEnvironmentName) -serviceName $(ServiceName)'
+            deploymentName: das-platform-monitoring-jobs-action-group
 
         - ${{ if eq(parameters.Environment, 'PROD') }}:
           - task: AzurePowerShell@5
@@ -66,23 +67,24 @@ jobs:
               azurePowerShellVersion: LatestVersion
               pwsh: true
           - powershell: |
-              [string] $AppInsightsResourcesArrayString= $Env:APP_INSIGHTS_RESOURCES_ARRAY_STRING
+              [string] $AppInsightsResourcesArrayString = $Env:APP_INSIGHTS_RESOURCES_ARRAY_STRING
                 Write-Host "The APP_INSIGHTS_RESOURCES_ARRAY_STRING environment variable value is '$AppInsightsResourcesArrayString'."
               
-              $AppInsightsResourcesArray= $AppInsightsResourcesArrayString | ConvertFrom-Json
+              $AppInsightsResourcesArray = $AppInsightsResourcesArrayString | ConvertFrom-Json
               foreach( $obj in $AppInsightsResourcesArray){
                   Write-Host ("AppInsightsResourceGroup:{0} AppInsightsName:{1}" -f $obj.AppInsightsResourceGroup, $obj.AppInsightsName)
-              } 
+              }
             displayName: Output Application Insights Resources
-          - task: AzurePowerShell@5
+          - task: AzureResourceManagerTemplateDeployment@3
             displayName: Deploy Failure Anomalies
             inputs:
-              azureSubscription: ${{ parameters.ServiceConnection }}
-              azurePowerShellVersion: 'LatestVersion'
-              pwsh: true
-              scriptType: InlineScript
-              inline: |
-                New-AzResourceGroupDeployment -ResourceGroupName $(ResourceGroupName) -TemplateFile action-group.json `
-                  -actionGroupResourceId $(ActionGroupResourceId) `
-                  -appInsightsResourcesArray $(AppInsightsResourcesArray)
-              workingDirectory: $(Pipeline.Workspace)/drop/azure/
+              deploymentScope: Resource Group
+              azureResourceManagerConnection: ${{ parameters.ServiceConnection }}
+              subscriptionId: $(SubscriptionId)
+              action: Create Or Update Resource Group
+              resourceGroupName: $(ResourceGroupName)
+              location: $(ResourceGroupLocation)
+              templateLocation: Linked artifact
+              csmFile: $(Pipeline.Workspace)/drop/azure/failure-anomalies.json
+              overrideParameters: '-appInsightsResourcesArray $(AppInsightsResourcesArray) -actionGroupResourceId $(ActionGroupResourceId)'
+              deploymentName: das-application-insights-failure-anomalies
