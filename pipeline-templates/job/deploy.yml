@@ -80,7 +80,10 @@ jobs:
               deploymentScope: Resource Group
               azureResourceManagerConnection: ${{ parameters.ServiceConnection }}
               subscriptionId: $(SubscriptionId)
+              action: Create Or Update Resource Group
+              resourceGroupName: $(ResourceGroupName)
               location: $(ResourceGroupLocation)
+              templateLocation: Linked artifact
               csmFile: $(Pipeline.Workspace)/drop/azure/failure-anomalies.json
               overrideParameters: '-appInsightsResourcesArray $(AppInsightsResourcesArray) -actionGroupResourceId $(ActionGroupResourceId)'
               deploymentName: das-application-insights-failure-anomalies
