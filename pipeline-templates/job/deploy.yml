@@ -54,7 +54,7 @@ jobs:
             location: $(ResourceGroupLocation)
             templateLocation: Linked artifact
             csmFile: $(Pipeline.Workspace)/drop/azure/action-group.json
-            overrideParameters: '-resourceEnvironmentName $(ResourceEnvironmentName) -serviceName $(ServiceName))'
+            overrideParameters: '-resourceEnvironmentName $(ResourceEnvironmentName) -serviceName $(ServiceName)'
             deploymentName: das-platform-monitoring-jobs-action-group
 
         - ${{ if eq(parameters.Environment, 'PROD') }}:
