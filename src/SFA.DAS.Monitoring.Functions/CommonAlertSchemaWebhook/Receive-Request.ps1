@@ -28,6 +28,11 @@ function Get-DownTime {
     return $downTime
 }
 
+function UtcToUk($t) {
+    $utc = [datetime]::SpecifyKind([datetime]$t, 'Utc')
+    [TimeZoneInfo]::ConvertTimeBySystemTimeZoneId($utc, "GMT Standard Time")
+}
+
 function Get-MessageMetadata {
     Param (
         [String]$AlertRule,
@@ -98,7 +103,7 @@ function Format-Title {
         [String]$AlertRule,
         [String]$MonitorCondition
     )
-    
+
     $MessageMetadata = Get-MessageMetadata -AlertRule $AlertRule -MonitorCondition $MonitorCondition
 
     $Formatting = @{
@@ -143,7 +148,7 @@ function Build-AdaptiveCard-Min {
         $facts += @{ title='Service:';   value= Sanitize-Ascii([string]$Ess.monitoringService) }
     }
     if ($Ess.firedDateTime) {
-        $facts += @{ title='Fired:';     value= Sanitize-Ascii([string]$Ess.firedDateTime) }
+        $facts += @{ title='Fired:'; value= (UtcToUk $Ess.firedDateTime).ToString("yyyy-MM-dd HH:mm:ss") }
     }
     if ($Ess.resolvedDateTime) {
         $resolvedDateTime = Sanitize-Ascii([string]$Ess.resolvedDateTime)
