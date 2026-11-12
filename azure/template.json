@@ -103,7 +103,7 @@
     "managementResourceGroupName": {
       "type": "string"
     },
-    "logAnalyticsSubscriptionId" {
+    "logAnalyticsSubscriptionId": {
       "type": "string",
       "defaultValue": "[subscription().subscriptionId]"
     },
@@ -215,8 +215,8 @@
             "value": "[variables('metricsFunctionAppName')]"
           },
           "logAnalyticsWorkspaceId": {
-            "value": "[resourceId(parameters('logAnalyticsWorkspaceId'),parameters('managementResourceGroupName'),'Microsoft.OperationalInsights/workspaces', parameters('logAnalyticsWorkspaceName'))]"
-          },
+            "value": "[resourceId(parameters('logAnalyticsSubscriptionId'),parameters('managementResourceGroupName'),'Microsoft.OperationalInsights/workspaces', parameters('logAnalyticsWorkspaceName'))]"
+          }
         }
       }
     },
@@ -262,6 +262,9 @@
           },
           "attachedService": {
             "value": "[variables('monitoringFunctionAppName')]"
+          },
+          "logAnalyticsWorkspaceId": {
+            "value": "[resourceId(parameters('logAnalyticsSubscriptionId'),parameters('managementResourceGroupName'),'Microsoft.OperationalInsights/workspaces', parameters('logAnalyticsWorkspaceName'))]"
           }
         }
       }
